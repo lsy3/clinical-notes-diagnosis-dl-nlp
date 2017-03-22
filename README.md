@@ -12,7 +12,7 @@ Proposal Report: [overleaf link](https://www.overleaf.com/8371794wnkynjkydwsn)
 1. extract the ff. data to code/data:
     1. DIAGNOSES_ICD.csv
     1. NOTEEVENTS.csv - a cleaned and sample version can be downloaded [here](https://drive.google.com/open?id=0B7IQxoKP3KPGWmFiUGlNTTBuWXM)
-    1. DATA_TFIDF_HADM_TOP10.csv - tfidf data based on hadm_id<->top10 icd9codes [download link](https://drive.google.com/open?id=
+    1. DATA_TFIDF_HADM_TOP10.csv - tfidf data based on hadm_id<->top10 icd9codes [download link](https://drive.google.com/open?id=0B7IQxoKP3KPGWmFiUGlNTTBuWXM)
 1. jupyter notebook
     1. Console command to run the notebook. Don't forget to set the kernel to "Toree Pyspark".
 
