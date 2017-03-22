@@ -194,7 +194,7 @@ def plot_with_labels(low_dim_embs, labels, filename='tsne.png'):
     plt.savefig(filename)
 
 
-def save_to_h5(file_path, data):
+def save_to_h5(file_path, embedding, dictionary):
     timestr = time.strftime("%Y%m%d-%H%M%S")
     file_name = 'embedding_matrix_' + timestr + '.h5'
     if not os.path.isdir(file_path):
@@ -202,7 +202,8 @@ def save_to_h5(file_path, data):
     full_name = os.path.join(file_path, file_name)
 
     with h5py.File(full_name, 'w') as hf:
-        hf.create_dataset('embedding_matrix', data=data)
+        hf.create_dataset('embedding_matrix', data=embedding)
+        hf.create_dataset('dictionary', data=dictionary)
     print('data saved!')
 
 
@@ -237,6 +238,7 @@ if __name__ == "__main__":
         stemmed = [stemmer.stem(word) for word in filtered]
         processed_docs_train += stemmed
 
+    # TODO: save the NLTK preprocessed training and testing sequence to file.
 
     # Phase 3: WordToVec
         ## Step 1: Build the dictionary and replace rare words with UNK token.
@@ -258,7 +260,7 @@ if __name__ == "__main__":
     final_embeddings = embedding_training(data, data_index, reverse_dictionary)
 
     file_path = './data'
-    save_to_h5(file_path, final_embeddings)
+    save_to_h5(file_path, final_embeddings, reverse_dictionary)
 
     tsne = TSNE(perplexity=30, n_components=2, init='pca', n_iter=5000)
     plot_only = 500
