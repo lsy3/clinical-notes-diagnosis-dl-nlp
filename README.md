@@ -2,23 +2,6 @@
 
 Proposal Report: [overleaf link](https://www.overleaf.com/8371794wnkynjkydwsn)
 
-### Todo List
-1. Data Preprocessing
-    1. top 10 all
-    1. top 50 all
-    1. top 10 category
-    1. top 50 category
-1. Feature Selection
-    1. bag of words
-    1. word2vec
-1. Model Training and Testing
-    1. LR
-    1. Random Forest
-    1. Feed Forward NN
-    1. RNN
-    1. LSTM
-    1. GRU
-
 ### Environment Setup
 1. conda env create -f environment.yml
 1. jupyter toree install --user --spark_home=<complete path>/spark-2.1.0-bin-hadoop2.7 --interpreters=PySpark
@@ -41,3 +24,20 @@ Proposal Report: [overleaf link](https://www.overleaf.com/8371794wnkynjkydwsn)
         * PATIENTS.csv (will probably not use this)
 * literature: important papers (pretty much the same w/ what is on slack)
 * proposal: other proposal related documents
+
+### Todo List
+1. Data Preprocessing
+    1. ~~top 10 all~~
+    1. top 50 all (code ready)
+    1. top 10 category
+    1. top 50 category
+1. Feature Selection
+    1. bag of words
+    1. word2vec
+1. Model Training and Testing
+    1. LR
+    1. Random Forest
+    1. Feed Forward NN
+    1. RNN
+    1. LSTM
+    1. GRU
