@@ -26,9 +26,12 @@ Proposal Report: [overleaf link](https://www.overleaf.com/8371794wnkynjkydwsn)
     1. If toree is not yet installed (should be included in environment.yml), run the ff. command:
         1. pip install https://dist.apache.org/repos/dist/dev/incubator/toree/0.2.0/snapshots/dev1/toree-pip/toree-0.2.0.dev1.tar.gz
         1. [github link](https://github.com/apache/incubator-toree)
-1. data cleaning
-    1. gawk -v RS='"' 'NR % 2 == 0 { gsub(/\n/, "|") } { printf("%s%s", $0, RT) }' NOTEEVENTS.csv > NOTEEVENTS2.csv
-        1. this approach did not completely work for me -Luke
+1. extract the ff. data to code/data:
+    1. DIAGNOSES_ICD.csv
+    1. NOTEEVENTS.csv - a cleaned and sample version can be downloaded [here](https://drive.google.com/open?id=0B7IQxoKP3KPGWmFiUGlNTTBuWXM)
+    1. DATA_TFIDF_HADM_TOP10.csv - tfidf data based on hadm_id<->top10 icd9codes [download link](https://drive.google.com/open?id=
+1. jupyter notebook
+    1. Console command to run the notebook. Don't forget to set the kernel to "Toree Pyspark".
 
 ### Folder Structure
 * code: all source code
