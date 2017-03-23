@@ -24,7 +24,6 @@ import numpy as np
 from six.moves import urllib
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
-from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
 
 
@@ -74,12 +73,12 @@ def generate_batch(data, data_index, batch_size, num_skips, skip_window):
   return batch, labels, data_index
 
 
-def embedding_training(data, data_index, reverse_dictionary):
+def embedding_training(index_list, data_index, reverse_dictionary):
     batch_size = 128
     embedding_size = 128  # Dimension of the embedding vector.
     skip_window = 1  # How many words to consider left and right.
     num_skips = 2  # How many times to reuse an input to generate a label.
-
+    vocabulary_size = len(index_list) + 1
     # We pick a random validation set to sample nearest neighbors. Here we limit the
     # validation samples to the words that have a low numeric ID, which by
     # construction are also the most frequent.
@@ -146,7 +145,7 @@ def embedding_training(data, data_index, reverse_dictionary):
         average_loss = 0
         for step in xrange(num_steps):
             batch_inputs, batch_labels, data_index = generate_batch(
-                data, data_index, batch_size, num_skips, skip_window)
+                index_list, data_index, batch_size, num_skips, skip_window)
             feed_dict = {train_inputs: batch_inputs, train_labels: batch_labels}
 
             # We perform one update step by evaluating the optimizer op (including it
@@ -164,7 +163,7 @@ def embedding_training(data, data_index, reverse_dictionary):
             # Note that this is expensive (~20% slowdown if computed every 500 steps)
             if step % 10000 == 0:
                 sim = similarity.eval()
-                for i in xrange(valid_size):
+                for i in xrange(1, valid_size):
                     valid_word = reverse_dictionary[valid_examples[i]]
                     print(reverse_dictionary[valid_examples[i]])
                     top_k = 8  # number of nearest neighbors
@@ -203,13 +202,13 @@ def save_to_h5(file_path, embedding, dictionary):
 
     with h5py.File(full_name, 'w') as hf:
         hf.create_dataset('embedding_matrix', data=embedding)
-        hf.create_dataset('dictionary', data=dictionary)
+        hf.create_dataset('dictionary_keys', data=dictionary.keys())
+        hf.create_dataset('dictionary_values', data = dictionary.values())
     print('data saved!')
 
 
 
 if __name__ == "__main__":
-    # Phase 1: read data to df
     train_df = pd.read_csv('./data/train.tsv', sep='\t', header=0)
     test_df = pd.read_csv('./data/test.tsv', sep='\t', header=0)
 
@@ -217,56 +216,64 @@ if __name__ == "__main__":
     test_x = test_df['Phrase'].values
     print('train size: ' + str(train_x.shape[0]) + ' test size: ' + str(test_x.shape[0]))
 
-    train_y = train_df['Sentiment'].values
-    print('number of labels: ' + str(len(np.unique(train_y))))
+    # top n codes
+    n = 10
+    # random feeding some value to the label
+    train_label = np.random.rand(train_x.shape[0], n)
+    test_label = np.random.rand(test_x.shape[0], n)
+    train_label[train_label < 0.5] = 0
+    train_label[train_label >= 0.5] = 1
+    test_label[test_label < 0.5] = 0
+    test_label[test_label >= 0.5] = 1
 
-    # Phase 2: Preprocessing using NLTK
-        ## 1. stopwords, remove words like 'a', 'is', and 'are'.
-        ## 2. stemmer, Stemmers remove morphological affixes from words, leaving only the word stem.
-        ## 3. -- TODO -- Other pre-processing methods
-        ## 4. Tokenlize the pre-processed text.
+    from keras.preprocessing.text import Tokenizer
+    toke = Tokenizer()
+    toke.fit_on_texts(train_x)
+    train_sequence = toke.texts_to_sequences(train_x)
+    test_sequence = toke.texts_to_sequences(test_x)
+    dictionary = toke.word_index
+    reverse_dictionary = dict(zip(dictionary.values(), dictionary.keys()))
+    index_list = dictionary.values()
 
-    stop_words = set(stopwords.words('english'))
-    # remove special symbols
-    stop_words.update(['.', ',', '"', "'", ':', ';', '(', ')', '[', ']', '{', '}'])
-    stemmer = SnowballStemmer('english')
 
-    processed_docs_train = []
-    for phrase in train_x:
-        tokens = word_tokenize(phrase)
-        filtered = [word for word in tokens if word not in stop_words]
-        stemmed = [stemmer.stem(word) for word in filtered]
-        processed_docs_train += stemmed
 
-    # TODO: save the NLTK preprocessed training and testing sequence to file.
+    import cPickle
+    cPickle.dump(reverse_dictionary, open('./data/reverse_dictionary.p', 'wb'))
+    cPickle.dump(train_sequence, open('./data/train_sequence.p', 'wb'))
+    cPickle.dump(test_sequence, open('./data/test_sequence.p', 'wb'))
+    cPickle.dump(train_label, open('./data/train_label.p', 'wb'))
+    cPickle.dump(test_label, open('./data/test_label.p', 'wb'))
 
-    # Phase 3: WordToVec
-        ## Step 1: Build the dictionary and replace rare words with UNK token.
-    vocabulary_size = 8000 # this number should smaller than the total word number
-    data, count, dictionary, reverse_dictionary = build_dataset(processed_docs_train, vocabulary_size)
-    del processed_docs_train  # Hint to reduce memory.
-    print('Most common words (+UNK)', count[:5])
-    print('Sample data', data[:10], [reverse_dictionary[i] for i in data[:10]])
 
+
+    # Function to generate a training batch for the skip-gram model.
     data_index = 0
-
-        ## Step2: Function to generate a training batch for the skip-gram model.
-    batch, labels, data_index = generate_batch(data, data_index, batch_size=8, num_skips=2, skip_window=1)
+    batch, labels, data_index = generate_batch(index_list, data_index, batch_size=8, num_skips=2, skip_window=1)
     for i in range(8):
       print(batch[i], reverse_dictionary[batch[i]],
             '->', labels[i, 0], reverse_dictionary[labels[i, 0]])
 
-        ## Step3: Train word2vec and get the embedding matrix
-    final_embeddings = embedding_training(data, data_index, reverse_dictionary)
+    # Train word2vec and get the embedding matrix
+    vocabulary_size = 5000
+    embedding_matrix = embedding_training(index_list, data_index, reverse_dictionary)
 
     file_path = './data'
-    save_to_h5(file_path, final_embeddings, reverse_dictionary)
+    timestr = time.strftime("%H%M%S")
+    file_name = 'embedding_matrix-' + timestr + '.p'
+    full_name = os.path.join(file_path, file_name)
+    cPickle.dump(embedding_matrix, open(full_name, 'wb'))
+    print('data saved!')
 
-    tsne = TSNE(perplexity=30, n_components=2, init='pca', n_iter=5000)
-    plot_only = 500
-    low_dim_embs = tsne.fit_transform(final_embeddings[:plot_only, :])
-    labels = [reverse_dictionary[i] for i in xrange(plot_only)]
-    plot_with_labels(low_dim_embs, labels)
+    try:
+        from sklearn.manifold import TSNE
 
+        tsne = TSNE(perplexity=30, n_components=2, init='pca', n_iter=5000)
+        plot_only = 500
+        low_dim_embs = tsne.fit_transform(embedding_matrix[:plot_only, :])
+        labels = [reverse_dictionary[i] for i in xrange(1, plot_only)]
+        plot_with_labels(low_dim_embs, labels)
+
+    except ImportError:
+        print("Please install sklearn and matplotlib to visualize embeddings")
 
 
