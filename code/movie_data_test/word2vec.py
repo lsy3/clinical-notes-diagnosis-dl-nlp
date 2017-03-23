@@ -258,8 +258,9 @@ if __name__ == "__main__":
     embedding_matrix = embedding_training(index_list, data_index, reverse_dictionary)
 
     file_path = './data'
-    timestr = time.strftime("%H%M%S")
-    file_name = 'embedding_matrix-' + timestr + '.p'
+    # timestr = time.strftime("%H%M%S")
+    file_name = 'embedding_matrix.p'
+    # file_name = 'embedding_matrix-' + timestr + '.p'
     full_name = os.path.join(file_path, file_name)
     cPickle.dump(embedding_matrix, open(full_name, 'wb'))
     print('data saved!')
