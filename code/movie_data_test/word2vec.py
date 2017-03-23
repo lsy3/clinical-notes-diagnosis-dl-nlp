@@ -209,42 +209,37 @@ def save_to_h5(file_path, embedding, dictionary):
 
 
 if __name__ == "__main__":
-    train_df = pd.read_csv('./data/train.tsv', sep='\t', header=0)
-    test_df = pd.read_csv('./data/test.tsv', sep='\t', header=0)
-
-    train_x = train_df['Phrase'].values
-    test_x = test_df['Phrase'].values
-    print('train size: ' + str(train_x.shape[0]) + ' test size: ' + str(test_x.shape[0]))
+    data_df = pd.read_csv('./data/data.tsv', sep='\t', header=0)
+    data_values = data_df['Phrase'].values
+    print('data size: ' + str(data_df.shape[0]))
 
     # top n codes
     n = 10
     # random feeding some value to the label
-    train_label = np.random.rand(train_x.shape[0], n)
-    test_label = np.random.rand(test_x.shape[0], n)
-    train_label[train_label < 0.5] = 0
-    train_label[train_label >= 0.5] = 1
-    test_label[test_label < 0.5] = 0
-    test_label[test_label >= 0.5] = 1
+    label = np.random.rand(data_values.shape[0], n)
+    label[label < 0.5] = 0
+    label[label >= 0.5] = 1
+
+    from sklearn.model_selection import train_test_split
+    train_data, test_data, train_label, test_label = train_test_split(data_values, label, test_size = 0.20, random_state=42)
+
 
     from keras.preprocessing.text import Tokenizer
     toke = Tokenizer()
-    toke.fit_on_texts(train_x)
-    train_sequence = toke.texts_to_sequences(train_x)
-    test_sequence = toke.texts_to_sequences(test_x)
+    toke.fit_on_texts(train_data)
     dictionary = toke.word_index
     reverse_dictionary = dict(zip(dictionary.values(), dictionary.keys()))
     index_list = dictionary.values()
 
-
+    train_sequence = toke.texts_to_sequences(train_data)
+    test_sequence = toke.texts_to_sequences(test_data)
 
     import cPickle
-    cPickle.dump(reverse_dictionary, open('./data/reverse_dictionary.p', 'wb'))
-    cPickle.dump(train_sequence, open('./data/train_sequence.p', 'wb'))
-    cPickle.dump(test_sequence, open('./data/test_sequence.p', 'wb'))
-    cPickle.dump(train_label, open('./data/train_label.p', 'wb'))
-    cPickle.dump(test_label, open('./data/test_label.p', 'wb'))
-
-
+    f = open('./data/preprocessing_data.p', 'wb')
+    for obj in [reverse_dictionary, train_sequence, test_sequence,
+                train_label, test_label]:
+        cPickle.dump(obj, f, protocol=cPickle.HIGHEST_PROTOCOL)
+    f.close()
 
     # Function to generate a training batch for the skip-gram model.
     data_index = 0
@@ -258,8 +253,9 @@ if __name__ == "__main__":
     embedding_matrix = embedding_training(index_list, data_index, reverse_dictionary)
 
     file_path = './data'
-    timestr = time.strftime("%H%M%S")
-    file_name = 'embedding_matrix-' + timestr + '.p'
+    # timestr = time.strftime("%H%M%S")
+    file_name = 'embedding_matrix.p'
+    # file_name = 'embedding_matrix-' + timestr + '.p'
     full_name = os.path.join(file_path, file_name)
     cPickle.dump(embedding_matrix, open(full_name, 'wb'))
     print('data saved!')
