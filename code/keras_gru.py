@@ -30,7 +30,7 @@ if __name__ == "__main__":
 
     #GRU with embedding trainable
     from keras.models import Sequential
-    from keras.layers import Dense, Dropout, Embedding, BatchNormalization
+    from keras.layers import Dense, Dropout, Embedding, BatchNormalization, TimeDistributed
     from keras.layers import LSTM, GRU
 
     vocabulary_size = len(dictionary) + 1
@@ -45,9 +45,12 @@ if __name__ == "__main__":
                         input_length=max_sequence_length,
                         trainable=True,
                         input_shape=train_sequence.shape[1:]))
-    model.add(GRU(512, return_sequences=False))
+    model.add(GRU(512, return_sequences=True))
     model.add(Dropout(0.5))
     model.add(BatchNormalization())
+    # model.add(GRU(512, return_sequences=True))
+    # model.add(Dropout(0.5))
+    # model.add(BatchNormalization())
     model.add(Dense(category_number, activation='sigmoid'))
 
     model.compile(loss='mse', optimizer='rmsprop', metrics=['mse'])
