@@ -31,11 +31,15 @@ Proposal Report: [overleaf link](https://www.overleaf.com/8371794wnkynjkydwsn)
     1. top 50 all (code ready)
     1. top 10 category
     1. top 50 category
+    1. consider doing advance test and train split
+        * maintain the test-train ratio of each category instead of just the test-train ratio of the whole dataset
 1. Feature Selection
     1. bag of words
+        * consider removing "very frequent words / stop words of the medical field" (Cesar's suggestion) 
     1. word2vec
 1. Model Training and Testing
-    1. LR
+    1. Logistic Regression
+        * implemented using spark.ml instead of spark.mllib. [reason in this link](http://stackoverflow.com/questions/30231840/difference-between-org-apache-spark-ml-classification-and-org-apache-spark-mllib)
     1. Random Forest
     1. Feed Forward NN
     1. RNN
