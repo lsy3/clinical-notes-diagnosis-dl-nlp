@@ -28,13 +28,15 @@ Final Report (draft): [overleaf link](https://www.overleaf.com/8371794wnkynjkydw
 1. Uploading a file. Based on [link](https://docs.microsoft.com/en-us/azure/hdinsight/hdinsight-upload-data#commandline) 
     * I tried Azure Command-Line Interface and Azure Storage Explorer, but for some reason, I can't upload using those methods. I just have this "uploading bar" with upload speed of 0 kbps.
     * I used the hadoop command line by typing the following on console
-        * scp <file to upload> sshuser@cse6250-fp-ssh.azurehdinsight.net:~
+        * scp file-to-upload sshuser@cse6250-fp-ssh.azurehdinsight.net:~
         * ssh sshuser@cse6250-fp-ssh.azurehdinsight.net
         * hadoop fs -copyFromLocal data.txt /example/data/data.txt
 
 ### Docker w/ GPU (for deep learning) [azure setup guide](https://github.com/NVIDIA/nvidia-docker/wiki/Deploy-on-Azure)
 1. make sure you have id_rsa (update your git repo using 'git pull')
-1. ssh docker-user@40.71.188.95 -i <path_to_git_root>/id_rsa
+1. ssh docker-user@40.71.188.95 -i path-to-git-root/id_rsa
+1. source activate cse6250
+    * to enter conda work environment.. although I haven't installed keras yet.. only tensorflow
 
 ### Folder Structure
 * code: all source code
