@@ -94,43 +94,75 @@ def batch_generator(X, y, batch_size, shuffle, feature_size):
     # return X_batch, y_batch
 
 
-f = open('./data/tfidf_top10.p', 'rb')
-loaded_data = []
-for i in range(2):  # [reverse_dictionary, train_sequence, test_sequence, train_label, test_label]:
-    loaded_data.append(cPickle.load(f))
-f.close()
+def train():
+    f = open('./data/tfidf_top10.p', 'rb')
+    loaded_data = []
+    for i in range(3):  # [features, label, feature_size]:
+        loaded_data.append(cPickle.load(f))
+    f.close()
 
-features = loaded_data[0]
-label = loaded_data[1]
-# feature_size = loaded_data[2]
+    features = loaded_data[0]
+    label = loaded_data[1]
+    feature_size = loaded_data[2]
+    # split train and test
+    train_percentage = 0.7
+    test_percentage = 0.15
+    indices = np.random.permutation(len(features))
+    train_valid_split = int(train_percentage * len(features))
+    valid_test_split = int(test_percentage * len(features))
 
-feature_size = 40000
-
-# LSTM with embedding trainable
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Embedding, BatchNormalization, Activation
-from keras.layers import LSTM
-
-
-print('Build model...')
-model = Sequential()
-model.add(Dense(units=1000, input_dim=feature_size))
-model.add(Activation('relu'))
-model.add(Dense(units=1000))
-model.add(Activation('relu'))
-model.add(Dense(units=100))
-model.add(Activation('relu'))
-model.add(Dense(units=10))
-model.add(Activation('softmax'))
+    train_idx = indices[:train_valid_split]
+    valid_idx = indices[train_valid_split:-valid_test_split]
+    test_idx = indices[:-valid_test_split]
 
 
-model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['mse'])
-model.summary()
-# model.fit(train_sequence, train_label, validation_split=0.2, epochs=2, batch_size=64)
+    train_data = list(features[i] for i in train_idx)
+    valid_data = list(features[i] for i in valid_idx)
+    test_data = list(features[i] for i in test_idx)
 
-model.fit_generator(generator=batch_generator(features, label, 32, True, feature_size),
-                    nb_epoch=100,
-                    samples_per_epoch=len(features))
+    train_label, valid_label, test_label = label[train_idx], label[valid_idx], label[test_idx]
+
+    # LSTM with embedding trainable
+    from keras.models import Sequential
+    from keras.layers import Dense, Dropout, Embedding, BatchNormalization, Activation
+    from keras.layers import LSTM
+
+
+    print('Build model...')
+    model = Sequential()
+    model.add(Dense(units=1000, input_dim=feature_size))
+    model.add(Activation('relu'))
+    model.add(Dense(units=1000))
+    model.add(Activation('relu'))
+    model.add(Dense(units=100))
+    model.add(Activation('relu'))
+    model.add(Dense(units=10))
+    model.add(Activation('softmax'))
+
+
+    model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['mse'])
+    model.summary()
+    model.fit_generator(generator=batch_generator(train_data, train_label, 512, True, feature_size),
+                        nb_epoch=10,
+                        validation_data=batch_generator(valid_data, valid_label, 512, True, feature_size),
+                        validation_steps=128,
+                        samples_per_epoch=30000)
+
+    # serialize model to JSON
+    model_json = model.to_json()
+    with open("./data/tfidf_top10_model.json", "w") as json_file:
+        json_file.write(model_json)
+    # serialize weights to HDF5
+    model.save_weights("./data/tfidf_top10_model.h5")
+    print("Saved model to disk")
+
+    t = model.evaluate_generator(generator=batch_generator(test_data, test_label, 32, True, feature_size))
+    print (t)
+
+def test():
+    pass
 
 
 
+if __name__ == '__main__':
+    train()
