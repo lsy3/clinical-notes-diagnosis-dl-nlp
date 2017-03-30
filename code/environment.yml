@@ -1,6 +1,4 @@
 name: cse6250
-channels: !!python/tuple
-- defaults
 dependencies:
 - _license=1.1=py27_1
 - alabaster=0.7.9=py27_0
@@ -216,5 +214,4 @@ dependencies:
   - prompt-toolkit==1.0.9
   - tables==3.3.0
   - toree==0.2.0.dev1
-prefix: /home/luke/.conda/envs/cse6250
 
