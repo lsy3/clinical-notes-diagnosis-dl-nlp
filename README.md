@@ -46,10 +46,22 @@ Final Report (draft): [overleaf link](https://www.overleaf.com/8371794wnkynjkydw
         * PATIENTS.csv (will probably not use this)
 * literature: important papers (pretty much the same w/ what is on slack)
 * proposal: other proposal related documents
+* 
 
+### Training and Testing for Keras Deep Learning Models
+* all the models are written in `dl_models.py` file. 
+* training:
+    * `python tfidf_train.py --epoch 10 --batch_size 128 --model_name nn_model_1 --gpu 0 --pre_train False`
+    * --epoch: number of passes over the entire dataset
+    * --batch_size: number of samples in batch training
+    * --model_name: provide function name in `dl_models.py` to call the corresonding model, the trained model weights will also be saved as `weights_{model_name}.h5`
+    * --gpu: specify which gpu to use
+    * --pre_train: by default is False, if set to True, model will first load the pretrained weights from `weights_{model_name}.h5`, then continue the training. 
+* testing:
+    * `python tfidf_test.py --batch_size 128 --model_name nn_model_1 --gpu 0`   
 ### Todo List
 1. Data Preprocessing
-    1. ~~top 10 all~~
+    1. ~~top 10 all~~ (run tfidf_preprocessing to prapare the data for deep learning training and testing use) 
     1. top 50 all (code ready)
     1. top 10 category
     1. top 50 category
