@@ -1,17 +1,23 @@
+import pandas as pd
+import numpy as np
 import cPickle
+import theano.sandbox.cuda
 import argparse
 import os, sys
 from os.path import join
-import numpy as np
-from keras.models import model_from_json
 import dl_models
+from keras.callbacks import ModelCheckpoint, EarlyStopping
+
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--epoch',      dest='nb_epoch', help='number of epoch', type=int)
     parser.add_argument('--batch_size', dest='batch_size', help='batch size', type=int)
     parser.add_argument('--model_name', dest='model_name', help='model loaded from dl_model.py', type=str)
     parser.add_argument('--gpu', dest='gpu', help='specify gpu', type=str)
+    parser.add_argument('--pre_train', dest = 'pre_train', help='continue train from pretrained para? True/False')
+    parser.set_defaults(pre_train = False)
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
@@ -42,12 +48,14 @@ def batch_generator(X, y, batch_size, shuffle, feature_size):
     # return X_batch, y_batch
 
 
-def test(data_file):
+def train(data_file):
     args = parse_args()
+    nb_epoch = args.nb_epoch
+    batch_size = args.batch_size
     gpu_number = args.gpu
     model_name = args.model_name
-    batch_size = args.batch_size
-    import theano
+    pre_train = args.pre_train
+    print(pre_train)
     theano.sandbox.cuda.use('gpu' + str(gpu_number))
     f = open(data_file, 'rb')
     loaded_data = []
@@ -55,31 +63,38 @@ def test(data_file):
         loaded_data.append(cPickle.load(f))
     f.close()
 
-    test_data = loaded_data[2]
-    test_label = loaded_data[5][:,0]
+    train_data = loaded_data[0]
+    valid_data = loaded_data[1]
+    train_label = loaded_data[3][:, 0]
+    valid_label = loaded_data[4][:, 0]
     from keras.utils.np_utils import to_categorical
-    test_label = to_categorical(test_label, num_classes=2)
-    feature_size = loaded_data[6]
+    train_label = to_categorical(train_label, num_classes=2)
+    valid_label = to_categorical(valid_label, num_classes=2)
 
-    file_path = './data/cache'
-    weights_name = 'weights_' + model_name + '.h5'
+
+    feature_size = loaded_data[6]
 
     function_list = dl_models.get_function_dict()
     model_func = function_list[model_name]
     model = model_func(feature_size)
-    model.load_weights(join(file_path, weights_name))
-    print('Loaded model from disk')
-    # convert sparse test data to dense
-    test_data_dense = np.zeros((len(test_data), feature_size))
-    for i in range(len(test_data)):
-        for j in test_data[i]:
-            test_data_dense[i, j[0]] = j[1]
-    test_pred = model.predict_classes(test_data_dense, batch_size = batch_size, verbose=0)
-    from sklearn.metrics import confusion_matrix
-    cm = confusion_matrix(loaded_data[5][:,0],test_pred)
-    print(cm)
+
+    if not os.path.isdir('./data/cache'):
+        os.mkdir('./data/cache')
+    weight_name = 'weights_' + model_name + '.h5'
+    weights_path = join('./data/cache', weight_name)
+    if pre_train == True:
+        model.load_weights(weights_path)
+    print ('checkpoint')
+    checkpointer = ModelCheckpoint(filepath=weights_path, verbose=1, save_best_only=True)
+    earlystopping = EarlyStopping(monitor='val_loss', patience=20, verbose=0, mode='auto')
+    model.fit_generator(generator=batch_generator(train_data, train_label, batch_size, True, feature_size),
+                        nb_epoch=nb_epoch,
+                        validation_data=batch_generator(valid_data, valid_label, batch_size, True, feature_size),
+                        validation_steps=128,
+                        samples_per_epoch= int(len(train_data) / batch_size),
+			            callbacks=[checkpointer, earlystopping])
 
 
 if __name__ == '__main__':
     data_file = './data/tfidf_top10.p'
-    test(data_file)
+    train(data_file)
