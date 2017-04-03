@@ -59,6 +59,9 @@ Final Report (draft): [overleaf link](https://www.overleaf.com/8371794wnkynjkydw
     * --pre_train: by default is False, if set to True, model will first load the pretrained weights from `weights_{model_name}.h5`, then continue the training. 
 * testing:
     * `python tfidf_test.py --batch_size 128 --model_name nn_model_1 --gpu 0`   
+    * 
+    * 
+
 ### Todo List
 1. Data Preprocessing
     1. ~~top 10 all~~ (run tfidf_preprocessing to prapare the data for deep learning training and testing use) 
