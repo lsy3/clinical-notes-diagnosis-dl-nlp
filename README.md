@@ -70,8 +70,8 @@ Final Report (draft): [overleaf link](https://www.overleaf.com/8371794wnkynjkydw
 
 * testing:
     * Test model with specified model name: `$ CUDA_VISIBLE_DEVICES=0 python tfidf_test.py --model_name nn_model_1 --batch_size 128`   
-    * `--model_name` by default is set to 'nn_model_1'
-    * `--batch_size` by default is set to 128
+    * `--model_name` default: `model_name = 'nn_model_1'`
+    * `--batch_size` default: `batch_size = 128`
 
 ### Todo List
 1. Data Preprocessing
