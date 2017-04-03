@@ -53,10 +53,12 @@ Final Report (draft): [overleaf link](https://www.overleaf.com/8371794wnkynjkydw
 * all the models are specified in `dl_models.py` file. 
 * run `tfidf_preprocessing` to prapare the data for deep learning training and testing use. 
 * training:
-    * `python tfidf_train.py --epoch 10 --batch_size 128 --model_name nn_model_1 --gpu 0 --pre_train False`
-    * `--epoch`: number of passes over the entire dataset
-    * `--batch_size`: number of samples in batch training
-    * `--model_name`: provide function name in `dl_models.py` to call the corresonding model. We also save the trained weights use the provided model name, as `weights_{model_name}.h5`
+    * Run training script with input arguments: `python tfidf_train.py --epoch 10 --batch_size 128 --model_name nn_model_1 --pre_train False`
+    * `--epoch`: number of passes over the entire dataset, default: `epoch = 50`
+    * `--batch_size`: number of samples in batch training, default: `batch_size = 128`
+    * `--model_name`: provide function name in `dl_models.py` to call the corresonding model. We also save the trained weights use the provided model name, as `weights_{model_name}.h5`, default: `model_name = 'nn_model_1'`
+    * `--pre_train`: by default is False, if set to True, model will first load the pretrained weights from `weights_{model_name}.h5`, then continue the training. default: `pre_train = False`
+    *  You can also run training with default arguments: `pythno tfidf_train.py`, 
     *  NOTE: TensorFlow will attempt to use (an equal fraction of the memory of) all GPU devices that are visible to it. If you want to run different sessions on different GPUs, you should do the following.
         *   Run each session in a different Python process.
         *   Start each process with a different value for the CUDA_VISIBLE_DEVICES environment variable. For example, if you want to test 2 different models specified in `dl_models.py` for tfidf data and you have 4 GPUs, you could run the following:
@@ -64,9 +66,8 @@ Final Report (draft): [overleaf link](https://www.overleaf.com/8371794wnkynjkydw
         *   `$ CUDA_VISIBLE_DEVICES=1 python tfidf_train.py --epoch 10 --batch_size 128 --model_name nn_model_1 --pretrain False` # Uses GPU 1.
         *   You can also use multiple gpus in one script. (not supported in our code)
         *   `$ CUDA_VISIBLE_DEVICES=2,3 python some_script.py`  # Uses GPUs 2 and 3.
+        *   The GPU devices in TensorFlow will still be numbered from zero (i.e. "/gpu:0" etc.), but they will correspond to the devices that you have made visible with CUDA_VISIBLE_DEVICES
 
-    Note the GPU devices in TensorFlow will still be numbered from zero (i.e. "/gpu:0" etc.), but they will correspond to the devices that you have made visible with CUDA_VISIBLE_DEVICES
-    * --pre_train: by default is False, if set to True, model will first load the pretrained weights from `weights_{model_name}.h5`, then continue the training. 
 * testing:
     * `python tfidf_test.py --batch_size 128 --model_name nn_model_1`   
     * 
