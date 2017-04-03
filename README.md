@@ -69,8 +69,8 @@ Final Report (draft): [overleaf link](https://www.overleaf.com/8371794wnkynjkydw
         *   The GPU devices in TensorFlow will still be numbered from zero (i.e. "/gpu:0" etc.), but they will correspond to the devices that you have made visible with CUDA_VISIBLE_DEVICES
 
 * testing:
-    * `python tfidf_test.py --batch_size 128 --model_name nn_model_1`   
-    * 
+    * Test model with specified model name: `python tfidf_test.py --model_name nn_model_1`   
+    * `--model_name` by default is set to 'nn_model_1'
     * 
 
 ### Todo List
