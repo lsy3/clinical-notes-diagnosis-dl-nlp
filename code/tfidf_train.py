@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import cPickle
-import theano.sandbox.cuda
 import argparse
 import os, sys
 from os.path import join
@@ -12,15 +11,13 @@ from keras.callbacks import ModelCheckpoint, EarlyStopping
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--epoch',      dest='nb_epoch', help='number of epoch', type=int)
-    parser.add_argument('--batch_size', dest='batch_size', help='batch size', type=int)
-    parser.add_argument('--model_name', dest='model_name', help='model loaded from dl_model.py', type=str)
-    parser.add_argument('--gpu', dest='gpu', help='specify gpu', type=str)
-    parser.add_argument('--pre_train', dest = 'pre_train', help='continue train from pretrained para? True/False')
-    parser.set_defaults(pre_train = False)
+    parser.add_argument('--epoch',      dest='nb_epoch', help='number of epoch', default=50, type = int)
+    parser.add_argument('--batch_size', dest='batch_size', help='batch size', default=128, type=int)
+    parser.add_argument('--model_name', dest='model_name', help='model loaded from dl_model.py', default='nn_model_1', type=str)
+    parser.add_argument('--pre_train', dest = 'pre_train', help='continue train from pretrained para? True/False', default=False)
     if len(sys.argv) == 1:
         parser.print_help()
-        sys.exit(1)
+        print ('Use Default Settings ......')
 
     args = parser.parse_args()
     return args
@@ -52,11 +49,9 @@ def train(data_file):
     args = parse_args()
     nb_epoch = args.nb_epoch
     batch_size = args.batch_size
-    gpu_number = args.gpu
     model_name = args.model_name
     pre_train = args.pre_train
-    print(pre_train)
-    theano.sandbox.cuda.use('gpu' + str(gpu_number))
+
     f = open(data_file, 'rb')
     loaded_data = []
     for i in range(7):  # [train_data, valid_data, test_data, train_label, valid_label, test_label, size]:
@@ -65,7 +60,8 @@ def train(data_file):
 
     train_data = loaded_data[0]
     valid_data = loaded_data[1]
-    train_label = loaded_data[3][:, 0]
+    # train_label = loaded_data[3]
+    train_label = loaded_data[3][:, 0] # test on only the first icd9code
     valid_label = loaded_data[4][:, 0]
     from keras.utils.np_utils import to_categorical
     train_label = to_categorical(train_label, num_classes=2)

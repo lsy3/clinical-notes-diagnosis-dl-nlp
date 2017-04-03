@@ -1,20 +1,18 @@
 import cPickle
 import argparse
-import os, sys
+import sys
 from os.path import join
 import numpy as np
-from keras.models import model_from_json
 import dl_models
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--batch_size', dest='batch_size', help='batch size', type=int)
-    parser.add_argument('--model_name', dest='model_name', help='model loaded from dl_model.py', type=str)
-    parser.add_argument('--gpu', dest='gpu', help='specify gpu', type=str)
+    parser.add_argument('--batch_size', dest='batch_size', help='batch size', default=128, type=int)
+    parser.add_argument('--model_name', dest='model_name', help='model loaded from dl_model.py', default='nn_model_1', type=str)
     if len(sys.argv) == 1:
         parser.print_help()
-        sys.exit(1)
+        print ('Run Default Settings ....... ')
 
     args = parser.parse_args()
     return args
@@ -39,16 +37,12 @@ def batch_generator(X, y, batch_size, shuffle, feature_size):
             if shuffle:
                 np.random.shuffle(sample_index)
             counter = 0
-    # return X_batch, y_batch
 
 
 def test(data_file):
     args = parse_args()
-    gpu_number = args.gpu
     model_name = args.model_name
     batch_size = args.batch_size
-    import theano
-    theano.sandbox.cuda.use('gpu' + str(gpu_number))
     f = open(data_file, 'rb')
     loaded_data = []
     for i in range(7):  # [train_data, valid_data, test_data, train_label, valid_label, test_label, size]:
@@ -57,8 +51,8 @@ def test(data_file):
 
     test_data = loaded_data[2]
     test_label = loaded_data[5][:,0]
-    from keras.utils.np_utils import to_categorical
-    test_label = to_categorical(test_label, num_classes=2)
+    # from keras.utils.np_utils import to_categorical
+    # test_label = to_categorical(test_label, num_classes=2)
     feature_size = loaded_data[6]
 
     file_path = './data/cache'
@@ -76,7 +70,7 @@ def test(data_file):
             test_data_dense[i, j[0]] = j[1]
     test_pred = model.predict_classes(test_data_dense, batch_size = batch_size, verbose=0)
     from sklearn.metrics import confusion_matrix
-    cm = confusion_matrix(loaded_data[5][:,0],test_pred)
+    cm = confusion_matrix(test_label,test_pred)
     print(cm)
 
 
