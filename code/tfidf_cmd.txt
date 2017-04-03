@@ -1,2 +1,0 @@
-python tfidf_train.py --epoch 10 --batch_size 128 --model_name nn_model_1 --gpu 0 --pre_train False
-python tfidf_test.py --batch_size 128 --model_name nn_model_1 --gpu 0
