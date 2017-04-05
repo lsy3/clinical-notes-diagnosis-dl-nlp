@@ -9,7 +9,7 @@ import dl_models
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch_size', dest='batch_size', help='batch size', default=128, type=int)
-    parser.add_argument('--model_name', dest='model_name', help='model loaded from dl_model.py', default='nn_model_1', type=str)
+    parser.add_argument('--model_name', dest='model_name', help='model loaded from dl_model.py', default='nn_model_2', type=str)
     if len(sys.argv) == 1:
         parser.print_help()
         print ('Run Default Settings ....... ')
@@ -50,7 +50,7 @@ def test(data_file):
     f.close()
 
     test_data = loaded_data[2]
-    test_label = loaded_data[5][:,0]
+    test_label = loaded_data[5]
     # from keras.utils.np_utils import to_categorical
     # test_label = to_categorical(test_label, num_classes=2)
     feature_size = loaded_data[6]
@@ -68,10 +68,41 @@ def test(data_file):
     for i in range(len(test_data)):
         for j in test_data[i]:
             test_data_dense[i, j[0]] = j[1]
-    test_pred = model.predict_classes(test_data_dense, batch_size = batch_size, verbose=0)
+    test_pred = model.predict(test_data_dense, batch_size = batch_size, verbose=0)
+    test_pred[test_pred >= 0.5] = 1
+    test_pred[test_pred < 0.5] = 0
+    print(test_pred.shape)
+    print(type(test_pred))
+    print test_pred
+
+
     from sklearn.metrics import confusion_matrix
-    cm = confusion_matrix(test_label,test_pred)
-    print(cm)
+    precision_list = np.zeros((test_label.shape[1]))
+    recall_list = np.zeros((test_label.shape[1]))
+    f1_list = np.zeros((test_label.shape[1]))
+    accuracy_list = np.zeros((test_label.shape[1]))
+    for i in range(test_label.shape[1]):
+        cm = confusion_matrix(test_label[:, i],test_pred[:, i])
+        tn = cm[0, 0]
+        fp = cm[0, 1]
+        fn = cm[1, 0]
+        tp = cm[1, 1]
+        # tn | fp
+        # ---|---
+        # fn | tp
+        precision = tp / float(tp + fp)
+        precision_list[i] = precision
+        recall = tp / float(tp + fn)
+        recall_list[i] = recall
+        f1 = 2 * (precision * recall / (precision + recall))
+        f1_list[i] = f1
+        accuracy = (tp + tn) / (tp + tn + fp + fn)
+        accuracy_list[i] = accuracy
+
+    print "precision: ", np.mean(precision_list), "std: ", np.std(precision_list)
+    print "recall: ", np.mean(recall_list), "std: ", np.std(recall_list)
+    print "accuracy: ", np.mean(accuracy_list), "std: ", np.std(accuracy_list)
+    print "f1: ", np.mean(f1_list), "std: ", np.std(f1_list)
 
 
 if __name__ == '__main__':

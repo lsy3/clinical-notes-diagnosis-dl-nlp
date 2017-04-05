@@ -45,6 +45,14 @@ def batch_generator(X, y, batch_size, shuffle, feature_size):
     # return X_batch, y_batch
 
 
+def sparse2dense(data, feature_size):
+    dense_data = np.zeros((len(data), feature_size))
+    for i in range(len(data)):
+        for j in data[i]:
+            dense_data[i, j[0]] = j[1]
+    return dense_data
+
+
 def train(data_file):
     args = parse_args()
     nb_epoch = args.nb_epoch
@@ -60,12 +68,13 @@ def train(data_file):
 
     train_data = loaded_data[0]
     valid_data = loaded_data[1]
-    # train_label = loaded_data[3]
-    train_label = loaded_data[3][:, 0] # test on only the first icd9code
-    valid_label = loaded_data[4][:, 0]
-    from keras.utils.np_utils import to_categorical
-    train_label = to_categorical(train_label, num_classes=2)
-    valid_label = to_categorical(valid_label, num_classes=2)
+    train_label = loaded_data[3]
+    valid_label = loaded_data[4]
+    # train_label = loaded_data[3][:, 0] # test on only the first icd9code
+    # valid_label = loaded_data[4][:, 0]
+    # from keras.utils.np_utils import to_categorical
+    # train_label = to_categorical(train_label, num_classes=2)
+    # valid_label = to_categorical(valid_label, num_classes=2)
 
 
     feature_size = loaded_data[6]
@@ -83,12 +92,20 @@ def train(data_file):
     print ('checkpoint')
     checkpointer = ModelCheckpoint(filepath=weights_path, verbose=1, save_best_only=True)
     earlystopping = EarlyStopping(monitor='val_loss', patience=20, verbose=0, mode='auto')
-    model.fit_generator(generator=batch_generator(train_data, train_label, batch_size, True, feature_size),
-                        nb_epoch=nb_epoch,
-                        validation_data=batch_generator(valid_data, valid_label, batch_size, True, feature_size),
-                        validation_steps=128,
-                        samples_per_epoch= int(len(train_data) / batch_size),
-			            callbacks=[checkpointer, earlystopping])
+    # model.fit_generator(generator=batch_generator(train_data, train_label, batch_size, True, feature_size),
+    #                     nb_epoch=nb_epoch,
+    #                     validation_data=batch_generator(valid_data, valid_label, batch_size, True, feature_size),
+    #                     validation_steps=128,
+    #                     samples_per_epoch= int(len(train_data) / batch_size),
+		# 	            callbacks=[checkpointer, earlystopping])
+    train_data = sparse2dense(train_data, feature_size)
+    valid_data = sparse2dense(valid_data, feature_size)
+
+    model.fit(train_data, train_label,
+              batch_size = batch_size,
+              epochs = nb_epoch,
+              validation_data = [valid_data, valid_label],
+              callbacks=[checkpointer, earlystopping])
 
 
 if __name__ == '__main__':
