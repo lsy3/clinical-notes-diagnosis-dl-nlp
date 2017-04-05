@@ -4,6 +4,7 @@ import sys
 from os.path import join
 import numpy as np
 import dl_models
+from sklearn.metrics import confusion_matrix
 
 
 def parse_args():
@@ -71,12 +72,7 @@ def test(data_file):
     test_pred = model.predict(test_data_dense, batch_size = batch_size, verbose=0)
     test_pred[test_pred >= 0.5] = 1
     test_pred[test_pred < 0.5] = 0
-    print(test_pred.shape)
-    print(type(test_pred))
-    print test_pred
 
-
-    from sklearn.metrics import confusion_matrix
     precision_list = np.zeros((test_label.shape[1]))
     recall_list = np.zeros((test_label.shape[1]))
     f1_list = np.zeros((test_label.shape[1]))
@@ -94,9 +90,9 @@ def test(data_file):
         precision_list[i] = precision
         recall = tp / float(tp + fn)
         recall_list[i] = recall
-        f1 = 2 * (precision * recall / (precision + recall))
+        f1 = 2 * (precision * recall / float(precision + recall))
         f1_list[i] = f1
-        accuracy = (tp + tn) / (tp + tn + fp + fn)
+        accuracy = (tp + tn) / float(tp + tn + fp + fn)
         accuracy_list[i] = accuracy
 
     print "precision: ", np.mean(precision_list), "std: ", np.std(precision_list)
