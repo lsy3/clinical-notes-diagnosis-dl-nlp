@@ -228,7 +228,7 @@ if __name__ == "__main__":
     toke = Tokenizer()
     toke.fit_on_texts(train_data)
     dictionary = toke.word_index
-    reverse_dictionary = dict(zip(dictionary.values(), dictionary.keys()))
+    reverse_dictionary = dict(zip(dictionary.values(), dictionary.keys())) # dict e.g. {1:'the', 2:'a' ...}
     index_list = dictionary.values()
 
     train_sequence = toke.texts_to_sequences(train_data)
