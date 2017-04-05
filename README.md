@@ -16,6 +16,8 @@ Final Report (draft): [overleaf link](https://www.overleaf.com/8371794wnkynjkydw
     1. DATA_TFIDF_HADM_TOP10.csv - tfidf data based on hadm_id<->top10 icd9codes [download link](https://drive.google.com/open?id=0B7IQxoKP3KPGWmFiUGlNTTBuWXM)
 1. jupyter notebook
     1. Console command to run the notebook. Don't forget to set the kernel to "Toree Pyspark".
+1. Cesar's google drive with word2vec and doc2vec models
+    1. (https://drive.google.com/open?id=0B5wTZcZsz2x7eVhaNkJoNkNWaWs)
 
 ### HDInsight (for pyspark related stuff)
 1. Logging in to Jupyter
