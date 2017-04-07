@@ -1,13 +1,19 @@
-echo "id,4019,2724,25000,4280,41401,53081,51881,42731,5849,5990,features" > data/DATA_TFIDF_HADM_TOP10.csv
-FIRST=1
-for f in data/DATA_TFIDF_HADM_TOP10/*.csv;
+#array=( data/DATA_HADM_TOP10 data/DATA_HADM_TOP10CAT )
+array=( data/DATA_TFIDFV0_HADM_TOP10_train data/DATA_TFIDFV0_HADM_TOP10_val data/DATA_TFIDFV0_HADM_TOP10_test data/DATA_TFIDFV0_HADM_TOP10CAT_train data/DATA_TFIDFV0_HADM_TOP10CAT_val data/DATA_TFIDFV0_HADM_TOP10CAT_test )
+#array=( data/DATA_HADM_TOP10 data/DATA_HADM_TOP10CAT data/DATA_TFIDFV0_HADM_TOP10_train data/DATA_TFIDFV0_HADM_TOP10_val data/DATA_TFIDFV0_HADM_TOP10_test )
+
+for TARGET_FILE in "${array[@]}"
 do
-    if [ "$FIRST" = "1" ]; then
-        echo "Processing $f file (first)";
-	FIRST=0
-        cat $f > data/DATA_TFIDF_HADM_TOP10.csv
-    else
-        echo "Processing $f file";
-        sed '1d' $f >> data/DATA_TFIDF_HADM_TOP10.csv
-    fi
+	FIRST=1
+	for f in $TARGET_FILE/*.csv;
+	do
+	    if [ "$FIRST" = "1" ]; then
+		echo "Processing $f file (first)";
+		FIRST=0
+		cat $f > $TARGET_FILE.csv
+	    else
+		echo "Processing $f file";
+		sed '1d' $f >> $TARGET_FILE.csv
+	    fi
+	done
 done

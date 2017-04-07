@@ -10,10 +10,12 @@ Final Report (draft): [overleaf link](https://www.overleaf.com/8371794wnkynjkydw
     1. If toree is not yet installed (should be included in environment.yml), run the ff. command:
         1. pip install https://dist.apache.org/repos/dist/dev/incubator/toree/0.2.0/snapshots/dev1/toree-pip/toree-0.2.0.dev1.tar.gz
         1. [github link](https://github.com/apache/incubator-toree)
-1. extract the ff. data to code/data:
-    1. DIAGNOSES_ICD.csv
-    1. NOTEEVENTS.csv - a cleaned and sample version can be downloaded [here](https://drive.google.com/open?id=0B7IQxoKP3KPGWmFiUGlNTTBuWXM)
-    1. DATA_TFIDF_HADM_TOP10.csv - tfidf data based on hadm_id<->top10 icd9codes [download link](https://drive.google.com/open?id=0B7IQxoKP3KPGWmFiUGlNTTBuWXM)
+1. extract the ff. data to code/data (Luke's google drive)[https://drive.google.com/open?id=0B7IQxoKP3KPGWmFiUGlNTTBuWXM]:
+    1. DIAGNOSES_ICD.csv (get from piazza)
+    1. NOTEEVENTS-2.csv - a cleaned and sample version
+    1. DATA_TFIDFV0_HADM_TOP10.tar.gz (40k features, train-val-test, based on Luke's implementation)
+    1. DATA_TFIDFV1_HADM_TOP10.tar.gz (20k+ features, train-val-test, based on Cesar's implementation)
+    1. DATA_WORD2VEC_HADM_TOP10.tar.gz (100 features, train-val-test, based on Cesar's implementation)
 1. jupyter notebook
     1. Console command to run the notebook. Don't forget to set the kernel to "Toree Pyspark".
 1. Cesar's google drive with word2vec and doc2vec models
@@ -78,8 +80,8 @@ Final Report (draft): [overleaf link](https://www.overleaf.com/8371794wnkynjkydw
 ### Todo List
 1. Data Preprocessing
     1. ~~top 10 all~~ 
-    1. top 50 all (code ready)
-    1. top 10 category
+    1. top 50 all
+    1. ~~top 10 category~~
     1. top 50 category
     1. consider doing advance test and train split
         * maintain the test-train ratio of each category instead of just the test-train ratio of the whole dataset
