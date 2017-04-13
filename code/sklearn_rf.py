@@ -6,7 +6,9 @@ import numpy as np
 from keras.preprocessing.sequence import pad_sequences
 import cPickle
 from sklearn.metrics import log_loss
-
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import precision_score, f1_score, recall_score
+from sklearn.metrics import average_precision_score
 
 ## Keras sample code
 # X, y1 = make_classification(n_samples=10, n_features=100, n_informative=30, n_classes=3, random_state=1)
@@ -27,7 +29,7 @@ def sparse2dense(data, feature_size):
             dense_data[i, j[0]] = j[1]
     return dense_data
 
-data_file = './data/tfidf_top10.p'
+data_file = './data/tfidf_v0_top10.p'
 f = open(data_file, 'rb')
 loaded_data = []
 for i in range(7):  # [train_data, valid_data, test_data, train_label, valid_label, test_label, size]:
@@ -37,26 +39,106 @@ f.close()
 train_data = loaded_data[0]
 valid_data = loaded_data[1]
 test_data = loaded_data[2]
-train_label = loaded_data[3][:, 2]  # test on only the first icd9code
-valid_label = loaded_data[4][:, 2]
-test_label = loaded_data[5][:,2]
-
 feature_size = loaded_data[6]
+train_label = loaded_data[3] # test on only the first icd9code
+valid_label = loaded_data[4]
+test_label = loaded_data[5]
+
 
 # convert sparse data to dense
 train_data = sparse2dense(train_data, feature_size)
 valid_data = sparse2dense(valid_data, feature_size)
 test_data = sparse2dense(test_data, feature_size)
 
-clf = RandomForestClassifier(max_depth=10, n_estimators=100)
-clf.fit(train_data, train_label)
-clf_probs = clf.predict_proba(test_data)
-clf_class = clf.predict(test_data)
-score = log_loss(test_label, clf_probs)
-print(score)
-from sklearn.metrics import confusion_matrix
-cm = confusion_matrix(test_label, clf_class)
-print(cm)
+precision_list = np.zeros((10))
+recall_list = np.zeros((10))
+f1_list = np.zeros((10))
+accuracy_list = np.zeros((10))
+
+precision_list_2 = np.zeros((10))
+recall_list_2 = np.zeros((10))
+f1_list_2 = np.zeros((10))
+
+for i in range(10):
+    train_label = loaded_data[3][:, i]
+    test_label = loaded_data[5][:, i]
+    clf = RandomForestClassifier(max_depth=10, n_estimators=100)
+    clf.fit(train_data, train_label)
+    clf_probs = clf.predict_proba(test_data)
+    clf_class = clf.predict(test_data)
+    score = log_loss(test_label, clf_probs)
+    # test_pred[test_pred >= 0.5] = 1
+    # test_pred[test_pred < 0.5] = 0
+    cm = confusion_matrix(test_label, clf_class)
+    print cm
+    tn = cm[0, 0]
+    fp = cm[0, 1]
+    fn = cm[1, 0]
+    tp = cm[1, 1]
+    precision = precision_score(test_label, clf_class, average='micro')
+    recall = recall_score(test_label, clf_class, average='macro')
+    f1 = f1_score(test_label, clf_class)
+    precision_list_2[i] = precision
+    recall_list_2[i] = recall
+    f1_list_2[i] = f1
+
+    print precision
+    print recall
+    print f1
+
+    # tn | fp
+    # ---|---
+    # fn | tp
+
+    precision = tp / float(tp + fp)
+    precision_list[i] = precision
+    recall = tp / float(tp + fn)
+    recall_list[i] = recall
+    f1 = 2 * (precision * recall / float(precision + recall))
+    f1_list[i] = f1
+    accuracy = (tp + tn) / float(tp + tn + fp + fn)
+    accuracy_list[i] = accuracy
+
+print "precision: ", np.mean(precision_list), "std: ", np.std(precision_list)
+print "recall: ", np.mean(recall_list), "std: ", np.std(recall_list)
+print "accuracy: ", np.mean(accuracy_list), "std: ", np.std(accuracy_list)
+print "f1: ", np.mean(f1_list), "std: ", np.std(f1_list)
+
+
+
+
+# from sklearn.neural_network import MLPClassifier
+# clf = MLPClassifier(solver='lbfgs', alpha=1e-5,
+#                     hidden_layer_sizes=(50, 10), random_state=1)
+# clf.fit(train_data, train_label)
+# test_pred = clf.predict(test_data)
+#
+# precision_list = np.zeros((test_label.shape[1]))
+# recall_list = np.zeros((test_label.shape[1]))
+# f1_list = np.zeros((test_label.shape[1]))
+# accuracy_list = np.zeros((test_label.shape[1]))
+# for i in range(test_label.shape[1]):
+#     cm = confusion_matrix(test_label[:, i], test_pred[:, i])
+#     tn = cm[0, 0]
+#     fp = cm[0, 1]
+#     fn = cm[1, 0]
+#     tp = cm[1, 1]
+#     # tn | fp
+#     # ---|---
+#     # fn | tp
+#     precision = tp / float(tp + fp)
+#     precision_list[i] = precision
+#     recall = tp / float(tp + fn)
+#     recall_list[i] = recall
+#     f1 = 2 * (precision * recall / float(precision + recall))
+#     f1_list[i] = f1
+#     accuracy = (tp + tn) / float(tp + tn + fp + fn)
+#     accuracy_list[i] = accuracy
+#
+# print "precision: ", np.mean(precision_list), "std: ", np.std(precision_list)
+# print "recall: ", np.mean(recall_list), "std: ", np.std(recall_list)
+# print "accuracy: ", np.mean(accuracy_list), "std: ", np.std(accuracy_list)
+# print "f1: ", np.mean(f1_list), "std: ", np.std(f1_list)
 
 
 # if __name__ == "__main__":
