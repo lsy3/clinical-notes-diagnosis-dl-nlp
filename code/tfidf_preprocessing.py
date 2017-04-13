@@ -83,6 +83,13 @@ def csv2pickle():
 
     train_label, valid_label, test_label = label[train_idx], label[valid_idx], label[test_idx]
 
+    print train_data
+    print valid_data
+    print test_data
+    print train_label
+    print valid_label
+    print test_label
+    print size
     f = open('./data/tfidf_top10.p', 'wb')
     for obj in [train_data, valid_data, test_data, train_label, valid_label, test_label, size]:
         cPickle.dump(obj, f, protocol=cPickle.HIGHEST_PROTOCOL)
