@@ -13,7 +13,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--datafile',      dest='datafile', help='input pickle file', default='./data/DATA_WORDSEQV0_HADM_TOP10.p', type = str)
     parser.add_argument('--embmatrix', dest='embmatrix', help='embedding matrix', default='./data/EMBMATRIX_WORD2VEC_v2_100dim.p', type = str)
-    parser.add_argument('--epoch',      dest='nb_epoch', help='number of epoch', default=5, type = int)
+    parser.add_argument('--epoch',      dest='nb_epoch', help='number of epoch', default=50, type = int)
     parser.add_argument('--batch_size', dest='batch_size', help='batch size', default=128, type = int)
     parser.add_argument('--model_name', dest='model_name', help='model loaded from *_model.py', default='conv1d_1', type=str)
     parser.add_argument('--pre_train', dest = 'pre_train', help='continue train from pretrained para? True/False', default=False)
@@ -103,8 +103,10 @@ def train(args):
         model.load_weights(weights_path)
     print ('checkpoint')
     checkpointer = ModelCheckpoint(filepath=weights_path, verbose=1, save_best_only=True)
-    earlystopping = EarlyStopping(monitor='val_loss', patience=20, verbose=0, mode='auto')
+    earlystopping = EarlyStopping(monitor='val_loss', patience=5, verbose=0, mode='auto')
 
+    #train_sequence = np.concatenate((train_sequence, val_sequence), axis=0)
+    #train_label = np.concatenate((train_label, val_label), axis=0)
 
     model.fit(train_sequence, train_label,
               batch_size = batch_size,

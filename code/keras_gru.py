@@ -9,7 +9,8 @@ import cPickle
 
 
 if __name__ == "__main__":
-    f = open('./data/preprocessing_data.p', 'rb')
+    #f = open('./data/preprocessing_data.p', 'rb')
+    f = open('./data/DATA_WORDSEQV0_HADM_TOP10.p', 'rb')
     loaded_data = []
     for i in range(5): # [reverse_dictionary, train_sequence, test_sequence, train_label, test_label]:
         loaded_data.append(cPickle.load(f))
@@ -21,16 +22,17 @@ if __name__ == "__main__":
     train_label = loaded_data[3]
     test_label = loaded_data[4]
 
-    max_sequence_length = 20
+    max_sequence_length = 600
     train_sequence = pad_sequences(train_sequence, maxlen=max_sequence_length)
     test_sequence = pad_sequences(test_sequence, maxlen=max_sequence_length)
-    f = open('./data/embedding_matrix.p')
+    #f = open('./data/embedding_matrix.p')
+    f = open('./data/EMB_MATRIX_MIMICIIIBASED.p')
     embedding_matrix = cPickle.load(f)
     f.close
 
     #GRU with embedding trainable
     from keras.models import Sequential
-    from keras.layers import Dense, Dropout, Embedding, BatchNormalization, TimeDistributed
+    from keras.layers import Dense, Dropout, Embedding, BatchNormalization, TimeDistributed, Flatten
     from keras.layers import LSTM, GRU
 
     vocabulary_size = len(dictionary) + 1
@@ -43,7 +45,7 @@ if __name__ == "__main__":
                         embedding_dim,
                         weights=[embedding_matrix],
                         input_length=max_sequence_length,
-                        trainable=True,
+                        trainable=False,
                         input_shape=train_sequence.shape[1:]))
     model.add(GRU(512, return_sequences=True))
     model.add(Dropout(0.5))
@@ -51,7 +53,8 @@ if __name__ == "__main__":
     # model.add(GRU(512, return_sequences=True))
     # model.add(Dropout(0.5))
     # model.add(BatchNormalization())
-    model.add(Dense(category_number, activation='sigmoid'))
+    model.add(Flatten())
+    model.add(Dense(category_number, activation='softmax'))
 
     model.compile(loss='mse', optimizer='rmsprop', metrics=['mse'])
     model.summary()
