@@ -100,6 +100,39 @@ FROM noteevents2
 """).show()
 
 spark.sql("""
+SELECT COUNT(DISTINCT hadm_id) AS hadm_count
+FROM diagnoses_icd_m2
+WHERE icd9_code IN
+    (SELECT icd9_code
+    FROM diagnoses_icd_m2
+    GROUP BY icd9_code
+    ORDER BY COUNT(DISTINCT hadm_id) DESC
+    LIMIT 10)
+""").show()
+
+spark.sql("""
+SELECT COUNT(DISTINCT hadm_id) AS hadm_count
+FROM diagnoses_icd_m2
+WHERE icd9_code IN
+    (SELECT icd9_code
+    FROM diagnoses_icd_m2
+    GROUP BY icd9_code
+    ORDER BY COUNT(DISTINCT hadm_id) DESC
+    LIMIT 50)
+""").show()
+
+spark.sql("""
+SELECT COUNT(DISTINCT hadm_id) AS hadm_count
+FROM diagnoses_icd_m2
+WHERE icd9_code IN
+    (SELECT icd9_code
+    FROM diagnoses_icd_m2
+    GROUP BY icd9_code
+    ORDER BY COUNT(DISTINCT hadm_id) DESC
+    LIMIT 100)
+""").show()
+
+spark.sql("""
 SELECT DISTINCT(category)
 FROM noteevents
 """).show()
