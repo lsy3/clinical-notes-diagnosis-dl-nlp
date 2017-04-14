@@ -3,11 +3,12 @@ import numpy as np
 import cPickle
 import argparse
 import os, sys
+import tensorflow as tf
 from os.path import join
 import wordseq_models
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.layers import Embedding
-
+import keras.backend.tensorflow_backend as K
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -82,13 +83,7 @@ def train(args):
     embedding_matrix = cPickle.load(f)
     f.close()
 
-    if args.gpu == '':
-        tf_setting = '/cpu:1'
-    else:
-        tf_setting = '/gpu:'+args.gpu
-
-    with tf.device(tf_setting):
-
+    if True:
         max_sequence_length = train_sequence.shape[1]
         vocabulary_size = len(dictionary) + 1
         embedding_dim = embedding_matrix.shape[1]
@@ -109,7 +104,7 @@ def train(args):
             os.mkdir('./data/cache')
         weight_name = 'weights_' + model_name + args.pre_train_append + '.h5'
         weights_path = join('./data/cache', weight_name)
-        if pre_train == True:
+        if pre_train:
             model.load_weights(weights_path)
 
         print ('checkpoint')
@@ -128,4 +123,12 @@ def train(args):
 
 if __name__ == '__main__':
     args = parse_args()
-    train(args)
+    #print os.environ["CUDA_VISIBLE_DEVICES"]
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
+    tf_setting = '/gpu:'+str(args.gpu)
+
+    print os.environ["CUDA_VISIBLE_DEVICES"], tf_setting
+    print args.pre_train
+    #with K.tf.device(tf_setting):
+    with tf.device(tf_setting):
+        train(args)
