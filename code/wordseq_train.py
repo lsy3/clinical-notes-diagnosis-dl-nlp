@@ -18,6 +18,8 @@ def parse_args():
     parser.add_argument('--model_name', dest='model_name', help='model loaded from *_model.py', default='conv1d_1', type=str)
     parser.add_argument('--pre_train_append', dest='pre_train_append', help='load weights_model_name<pre_train_append>', default='', type=str)
     parser.add_argument('--pre_train', dest = 'pre_train', help='continue train from pretrained para? True/False', default=False)
+    parser.add_argument('--gpu', dest = 'gpu', help='gpu no.', default='0',type=str)
+
     if len(sys.argv) == 1:
         parser.print_help()
         print ('Use Default Settings ......')
@@ -78,42 +80,50 @@ def train(args):
 
     f = open(args.embmatrix)
     embedding_matrix = cPickle.load(f)
-    f.close
+    f.close()
 
-    max_sequence_length = train_sequence.shape[1]
-    vocabulary_size = len(dictionary) + 1
-    embedding_dim = embedding_matrix.shape[1]
-    category_number = train_label.shape[1]
-    input_shape = train_sequence.shape[1:]
+    if args.gpu == '':
+        tf_setting = '/cpu:1'
+    else:
+        tf_setting = '/gpu:'+args.gpu
 
-    embedding_layer = Embedding(vocabulary_size,
-                        embedding_dim,
-                        weights=[embedding_matrix],
-                        input_length=max_sequence_length,
-                        trainable=False,
-                        input_shape=input_shape)
+    with tf.device(tf_setting):
 
-    model_func = getattr(wordseq_models, model_name)
-    model = model_func(input_shape, category_number, embedding_layer)
+        max_sequence_length = train_sequence.shape[1]
+        vocabulary_size = len(dictionary) + 1
+        embedding_dim = embedding_matrix.shape[1]
+        category_number = train_label.shape[1]
+        input_shape = train_sequence.shape[1:]
 
-    if not os.path.isdir('./data/cache'):
-        os.mkdir('./data/cache')
-    weight_name = 'weights_' + model_name + args.pre_train_append + '.h5'
-    weights_path = join('./data/cache', weight_name)
-    if pre_train == True:
-        model.load_weights(weights_path)
-    print ('checkpoint')
-    checkpointer = ModelCheckpoint(filepath=weights_path, verbose=1, save_best_only=True)
-    earlystopping = EarlyStopping(monitor='val_loss', patience=5, verbose=0, mode='auto')
+        embedding_layer = Embedding(vocabulary_size,
+                            embedding_dim,
+                            weights=[embedding_matrix],
+                            input_length=max_sequence_length,
+                            trainable=False,
+                            input_shape=input_shape)
 
-    #train_sequence = np.concatenate((train_sequence, val_sequence), axis=0)
-    #train_label = np.concatenate((train_label, val_label), axis=0)
+        model_func = getattr(wordseq_models, model_name)
+        model = model_func(input_shape, category_number, embedding_layer)
 
-    model.fit(train_sequence, train_label,
-              batch_size = batch_size,
-              epochs = nb_epoch,
-              validation_data = [val_sequence, val_label],
-              callbacks=[checkpointer, earlystopping])
+        if not os.path.isdir('./data/cache'):
+            os.mkdir('./data/cache')
+        weight_name = 'weights_' + model_name + args.pre_train_append + '.h5'
+        weights_path = join('./data/cache', weight_name)
+        if pre_train == True:
+            model.load_weights(weights_path)
+
+        print ('checkpoint')
+        checkpointer = ModelCheckpoint(filepath=weights_path, verbose=1, save_best_only=True)
+        earlystopping = EarlyStopping(monitor='val_loss', patience=5, verbose=0, mode='auto')
+
+        #train_sequence = np.concatenate((train_sequence, val_sequence), axis=0)
+        #train_label = np.concatenate((train_label, val_label), axis=0)
+
+        model.fit(train_sequence, train_label,
+                  batch_size = batch_size,
+                  epochs = nb_epoch,
+                  validation_data = [val_sequence, val_label],
+                  callbacks=[checkpointer, earlystopping])
 
 
 if __name__ == '__main__':
