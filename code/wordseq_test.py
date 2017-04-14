@@ -1,6 +1,7 @@
 import cPickle
 import argparse
 import sys
+import os
 from os.path import join
 import numpy as np
 import wordseq_models
@@ -13,6 +14,8 @@ def parse_args():
     parser.add_argument('--embmatrix', dest='embmatrix', help='embedding matrix', default='./data/EMBMATRIX_WORD2VEC_v2_100dim.p', type = str)
     parser.add_argument('--batch_size', dest='batch_size', help='batch size', default=128, type=int)
     parser.add_argument('--model_name', dest='model_name', help='model loaded from dl_model.py', default='conv1d_1', type=str)
+    parser.add_argument('--append_name', dest='pre_train_append', help='load weights_model_name<append_name>', default='', type=str)
+    parser.add_argument('--gpu', dest = 'gpu', help='set gpu no to be used (default: all)', default='',type=str)
     if len(sys.argv) == 1:
         parser.print_help()
         print ('Run Default Settings ....... ')
@@ -78,7 +81,7 @@ def test(args):
                         input_shape=input_shape)
 
     file_path = './data/cache'
-    weights_name = 'weights_' + model_name + '.h5'
+    weights_name = 'weights_' + model_name + args.pre_train_append + '.h5'
 
     model_func = getattr(wordseq_models, model_name)
     model = model_func(input_shape, category_number, embedding_layer)
@@ -119,4 +122,6 @@ def test(args):
 
 if __name__ == '__main__':
     args = parse_args()
+    if args.gpu:
+        os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
     test(args)

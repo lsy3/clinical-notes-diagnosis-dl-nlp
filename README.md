@@ -16,6 +16,10 @@ Final Report (draft): [overleaf link](https://www.overleaf.com/8371794wnkynjkydw
     1. DATA_TFIDFV0_HADM_TOP10.tar.gz (40k features, train-val-test, based on Luke's implementation)
     1. DATA_TFIDFV1_HADM_TOP10.tar.gz (20k+ features, train-val-test, based on Cesar's implementation)
     1. DATA_WORD2VEC_HADM_TOP10.tar.gz (100 features, train-val-test, based on Cesar's implementation)
+    1. DATA_HDM.csv.tar.gz (contains filtered rows and its corresponding labels and text)
+    1. DATA_HDM_CLEANED.csv.tar.gz (contains filtered rows and its corresponding labels and text (stopwords removed))
+    1. DATA_WORDSEQ_ALL.tar.gz (WORDSEQ V0 and V1 for top10-50-code-cat)
+    1. EMBMATRIX_ALL.tar.gz (Embedding Matrix for WORDSEQ V0 and V1, top10-50-code-cat)
 1. jupyter notebook
     1. Console command to run the notebook. Don't forget to set the kernel to "Toree Pyspark".
 1. Cesar's google drive with word2vec and doc2vec models
