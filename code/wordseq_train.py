@@ -18,6 +18,8 @@ def parse_args():
     parser.add_argument('--model_name', dest='model_name', help='model loaded from *_model.py', default='conv1d_1', type=str)
     parser.add_argument('--pre_train_append', dest='pre_train_append', help='load weights_model_name<pre_train_append>', default='', type=str)
     parser.add_argument('--pre_train', dest = 'pre_train', help='continue train from pretrained para? True/False', default=False)
+    parser.add_argument('--gpu', dest = 'gpu', help='gpu no.', default='0', stype=str)
+    
     if len(sys.argv) == 1:
         parser.print_help()
         print ('Use Default Settings ......')
@@ -79,6 +81,8 @@ def train(args):
     f = open(args.embmatrix)
     embedding_matrix = cPickle.load(f)
     f.close
+
+    with tf.device('/gpu:0'):
 
     max_sequence_length = train_sequence.shape[1]
     vocabulary_size = len(dictionary) + 1
