@@ -21,6 +21,7 @@ def parse_args():
     parser.add_argument('--pre_train', dest = 'pre_train', help='continue train from pretrained para? True/False', default=False)
     parser.add_argument('--gpu', dest = 'gpu', help='set gpu no to be used (default: all)', default='',type=str)
     parser.add_argument('--plot_model', dest = 'plot_model', help='plot the said model', default='', type=str)
+    parser.add_argument('--patience', dest ='patience', help='patient for early stopper', default=5, type=int)
 
     if len(sys.argv) == 1:
         parser.print_help()
@@ -113,7 +114,8 @@ def train(args):
 
     print ('checkpoint')
     checkpointer = ModelCheckpoint(filepath=weights_path, verbose=1, save_best_only=True)
-    earlystopping = EarlyStopping(monitor='val_loss', patience=5, verbose=0, mode='auto')
+    earlystopping = EarlyStopping(monitor='val_loss', patience=args.patience, verbose=0, mode='auto')
+    print('early stop at ', args.patience)
 
     #train_sequence = np.concatenate((train_sequence, val_sequence), axis=0)
     #train_label = np.concatenate((train_label, val_label), axis=0)
