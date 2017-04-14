@@ -14,6 +14,7 @@ def parse_args():
     parser.add_argument('--batch_size', dest='batch_size', help='batch size', default=128, type=int)
     parser.add_argument('--model_name', dest='model_name', help='model loaded from dl_model.py', default='conv1d_1', type=str)
     parser.add_argument('--pre_train_append', dest='pre_train_append', help='load weights_model_name<pre_train_append>', default='', type=str)
+    parser.add_argument('--gpu', dest = 'gpu', help='set gpu no to be used (default: all)', default='',type=str)
     if len(sys.argv) == 1:
         parser.print_help()
         print ('Run Default Settings ....... ')
@@ -120,4 +121,6 @@ def test(args):
 
 if __name__ == '__main__':
     args = parse_args()
+    if args.gpu:
+        os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
     test(args)

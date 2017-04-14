@@ -33,7 +33,7 @@ def conv1d_1(input_shape, output_shape, embedding_layer):
     x = MaxPooling1D(35, padding='same')(x)  # global max pooling
     x = Flatten()(x)
     x = Dense(128, activation='relu')(x)
-    preds = Dense(output_shape, activation='softmax')(x)
+    preds = Dense(output_shape, activation='sigmoid')(x)
 
     model = Model(sequence_input, preds)
     model.compile(loss='categorical_crossentropy',
@@ -82,10 +82,10 @@ def gru_2(input_shape, output_shape, embedding_layer):
 
     #model.add(Input(shape=input_shape, dtype='int32'))
     model.add(embedding_layer)
-    model.add(GRU(128, return_sequences=True))  # returns a sequence of vectors of dimension 32
-    model.add(Dense(10, activation='relu'))
-    model.add(Flatten())
-    model.add(Dense(output_shape, activation='softmax'))
+    model.add(GRU(256))  # returns a sequence of vectors of dimension 32
+    model.add(Dropout(0.5))
+    model.add(BatchNormalization())
+    model.add(Dense(output_shape, activation='sigmoid'))
 
     model.compile(loss='categorical_crossentropy',
                   optimizer='rmsprop',

@@ -8,7 +8,7 @@ from os.path import join
 import wordseq_models
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.layers import Embedding
-import keras.backend.tensorflow_backend as K
+from keras.utils import plot_model
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -19,7 +19,8 @@ def parse_args():
     parser.add_argument('--model_name', dest='model_name', help='model loaded from *_model.py', default='conv1d_1', type=str)
     parser.add_argument('--pre_train_append', dest='pre_train_append', help='load weights_model_name<pre_train_append>', default='', type=str)
     parser.add_argument('--pre_train', dest = 'pre_train', help='continue train from pretrained para? True/False', default=False)
-    parser.add_argument('--gpu', dest = 'gpu', help='gpu no.', default='0',type=str)
+    parser.add_argument('--gpu', dest = 'gpu', help='set gpu no to be used (default: all)', default='',type=str)
+    parser.add_argument('--plot_model', dest = 'plot_model', help='plot the said model', default='', type=str)
 
     if len(sys.argv) == 1:
         parser.print_help()
@@ -83,52 +84,49 @@ def train(args):
     embedding_matrix = cPickle.load(f)
     f.close()
 
-    if True:
-        max_sequence_length = train_sequence.shape[1]
-        vocabulary_size = len(dictionary) + 1
-        embedding_dim = embedding_matrix.shape[1]
-        category_number = train_label.shape[1]
-        input_shape = train_sequence.shape[1:]
+    max_sequence_length = train_sequence.shape[1]
+    vocabulary_size = len(dictionary) + 1
+    embedding_dim = embedding_matrix.shape[1]
+    category_number = train_label.shape[1]
+    input_shape = train_sequence.shape[1:]
 
-        embedding_layer = Embedding(vocabulary_size,
-                            embedding_dim,
-                            weights=[embedding_matrix],
-                            input_length=max_sequence_length,
-                            trainable=False,
-                            input_shape=input_shape)
+    embedding_layer = Embedding(vocabulary_size,
+                        embedding_dim,
+                        weights=[embedding_matrix],
+                        input_length=max_sequence_length,
+                        trainable=False,
+                        input_shape=input_shape)
 
-        model_func = getattr(wordseq_models, model_name)
-        model = model_func(input_shape, category_number, embedding_layer)
+    model_func = getattr(wordseq_models, model_name)
+    model = model_func(input_shape, category_number, embedding_layer)
 
-        if not os.path.isdir('./data/cache'):
-            os.mkdir('./data/cache')
-        weight_name = 'weights_' + model_name + args.pre_train_append + '.h5'
-        weights_path = join('./data/cache', weight_name)
-        if pre_train:
-            model.load_weights(weights_path)
+    if args.plot_model:
+        plot_model(model, args.plot_model, True, False)
+        return
 
-        print ('checkpoint')
-        checkpointer = ModelCheckpoint(filepath=weights_path, verbose=1, save_best_only=True)
-        earlystopping = EarlyStopping(monitor='val_loss', patience=5, verbose=0, mode='auto')
+    if not os.path.isdir('./data/cache'):
+        os.mkdir('./data/cache')
+    weight_name = 'weights_' + model_name + args.pre_train_append + '.h5'
+    weights_path = join('./data/cache', weight_name)
+    if pre_train:
+        model.load_weights(weights_path)
 
-        #train_sequence = np.concatenate((train_sequence, val_sequence), axis=0)
-        #train_label = np.concatenate((train_label, val_label), axis=0)
+    print ('checkpoint')
+    checkpointer = ModelCheckpoint(filepath=weights_path, verbose=1, save_best_only=True)
+    earlystopping = EarlyStopping(monitor='val_loss', patience=5, verbose=0, mode='auto')
 
-        model.fit(train_sequence, train_label,
-                  batch_size = batch_size,
-                  epochs = nb_epoch,
-                  validation_data = [val_sequence, val_label],
-                  callbacks=[checkpointer, earlystopping])
+    #train_sequence = np.concatenate((train_sequence, val_sequence), axis=0)
+    #train_label = np.concatenate((train_label, val_label), axis=0)
+
+    model.fit(train_sequence, train_label,
+              batch_size = batch_size,
+              epochs = nb_epoch,
+              validation_data = [val_sequence, val_label],
+              callbacks=[checkpointer, earlystopping])
 
 
 if __name__ == '__main__':
     args = parse_args()
-    #print os.environ["CUDA_VISIBLE_DEVICES"]
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
-    tf_setting = '/gpu:'+str(args.gpu)
-
-    print os.environ["CUDA_VISIBLE_DEVICES"], tf_setting
-    print args.pre_train
-    #with K.tf.device(tf_setting):
-    with tf.device(tf_setting):
-        train(args)
+    if args.gpu:
+        os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
+    train(args)
