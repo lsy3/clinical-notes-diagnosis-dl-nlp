@@ -1,6 +1,7 @@
 import cPickle
 import argparse
 import sys
+import os
 from os.path import join
 import numpy as np
 import wordseq_models
