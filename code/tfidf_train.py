@@ -4,7 +4,7 @@ import cPickle
 import argparse
 import os, sys
 from os.path import join
-import dl_models
+import tfidf_models
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 
 
@@ -12,7 +12,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--epoch',      dest='nb_epoch', help='number of epoch', default=500, type = int)
     parser.add_argument('--batch_size', dest='batch_size', help='batch size', default=128, type=int)
-    parser.add_argument('--model_name', dest='model_name', help='model loaded from dl_model.py', default='nn_model_1', type=str)
+    parser.add_argument('--model_name', dest='model_name', help='model loaded from tfidf_model.py', default='nn_model_1', type=str)
     parser.add_argument('--pre_train', dest = 'pre_train', help='continue train from pretrained para? True/False', default=False)
     parser.add_argument('--data_file', dest='data_file', help='data file name', default='tfidf_v0_top10', type=str)
     if len(sys.argv) == 1:
@@ -54,7 +54,7 @@ def sparse2dense(data, feature_size):
 
 
 def train(model_name, weights_path, train_data, train_label, valid_data, valid_label, feature_size, batch_size, nb_epoch, pre_train):
-    function_list = dl_models.get_function_dict()
+    function_list = tfidf_models.get_function_dict()
     model_func = function_list[model_name]
     model = model_func(feature_size)
 

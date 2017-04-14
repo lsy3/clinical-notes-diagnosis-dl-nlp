@@ -47,6 +47,12 @@ if __name__ == "__main__":
                         input_length=max_sequence_length,
                         trainable=True,
                         input_shape=train_sequence.shape[1:]))
+
+    # from keras import backend as K
+    # get_embedding_output = K.function([model.layers[0].input],
+    #                                   [model.layers[0].output])
+
+    # get_embedding_output
     model.add(LSTM(256))
     model.add(Dropout(0.5))
     model.add(BatchNormalization())

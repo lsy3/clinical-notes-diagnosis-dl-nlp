@@ -15,7 +15,7 @@ def parse_args():
     parser.add_argument('--embmatrix', dest='embmatrix', help='embedding matrix', default='./data/EMBMATRIX_WORD2VEC_v2_100dim.p', type = str)
     parser.add_argument('--epoch',      dest='nb_epoch', help='number of epoch', default=50, type = int)
     parser.add_argument('--batch_size', dest='batch_size', help='batch size', default=128, type = int)
-    parser.add_argument('--model_name', dest='model_name', help='model loaded from *_model.py', default='conv1d_1', type=str)
+    parser.add_argument('--model_name', dest='model_name', help='model loaded from *_model.py', default='conv2d_1', type=str)
     parser.add_argument('--pre_train', dest = 'pre_train', help='continue train from pretrained para? True/False', default=False)
     if len(sys.argv) == 1:
         parser.print_help()

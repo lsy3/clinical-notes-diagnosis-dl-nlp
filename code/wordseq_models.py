@@ -1,25 +1,39 @@
 from keras.models import *
 from keras.layers import *
 
-def lstm_model_1(vocabulary_size, embedding_matrix, max_sequence_length, category_number, input_shape):
-    # LSTM with embedding trainable
-    embedding_dim = embedding_matrix.shape[1]
-
+def lstm_model_1(input_shape, output_shape, embedding_layer):
     print('Build model...')
     model = Sequential()
-    model.add(Embedding(vocabulary_size,
-                        embedding_dim,
-                        weights=[embedding_matrix],
-                        input_length=max_sequence_length,
-                        trainable=True,
-                        input_shape=input_shape))
-    model.add(LSTM(256))
+    model.add(embedding_layer)
+    model.add(LSTM(256, return_sequences=True))
     model.add(Dropout(0.5))
     model.add(BatchNormalization())
-    model.add(Dense(category_number, activation='sigmoid'))
+    model.add(LSTM(64))
+    model.add(Dropout(0.5))
+    model.add(BatchNormalization())
+    model.add(Dense(output_shape, activation='sigmoid'))
 
-    model.compile(loss='mse', optimizer='rmsprop', metrics=['mse'])
+    model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['acc', 'mse'])
     model.summary()
+    return model
+
+
+def lstm_model_glove_1(input_shape, output_shape, embedding_layer):
+    print('Build model...')
+    model = Sequential()
+    model.add(embedding_layer)
+    model.add(LSTM(256, return_sequences=True))
+    model.add(Dropout(0.5))
+    model.add(BatchNormalization())
+    model.add(LSTM(64))
+    model.add(Dropout(0.5))
+    model.add(BatchNormalization())
+    model.add(Dense(output_shape, activation='sigmoid'))
+
+    model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['acc', 'mse'])
+    model.summary()
+    return model
+
 
 def conv1d_1(input_shape, output_shape, embedding_layer):
     sequence_input = Input(shape=input_shape, dtype='int32')
@@ -62,6 +76,41 @@ def conv1d_2(input_shape, output_shape, embedding_layer):
 
     return model
 
+
+def conv2d_1(input_shape, output_shape, embedding_layer):
+    import os
+    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "7"
+    from tensorflow.python.client import device_lib
+    print device_lib.list_local_devices()
+
+    print('Build model...')
+    model = Sequential()
+    model.add(embedding_layer)
+    model.add(Conv2D(64, (5, 5), activation='relu'))
+    model.add(MaxPooling2D((2, 2), strides=(2, 2)))
+    model.add(BatchNormalization())
+
+    model.add(ZeroPadding2D((1, 1)))
+    model.add(Conv2D(128, (3, 3), activation='relu'))
+    model.add(MaxPooling2D((2, 2), strides=(2, 2)))
+    model.add(BatchNormalization())
+
+    model.add(Flatten())
+    model.add(Dense(128))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(64))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(output_shape, activation='sigmoid'))
+
+    model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['acc', 'mse'])
+    model.summary()
+    return model
+
+
+
 def gru_1(input_shape, output_shape, embedding_layer):
     model = Sequential()
 
@@ -69,7 +118,7 @@ def gru_1(input_shape, output_shape, embedding_layer):
     model.add(embedding_layer)
     model.add(GRU(128, return_sequences=True, dropout=0.2, recurrent_dropout=0.2))  # returns a sequence of vectors of dimension 32
     model.add(GRU(128, dropout=0.2, recurrent_dropout=0.2))  # return a single vector of dimension 32
-    model.add(Dense(output_shape, activation='softmax'))
+    model.add(Dense(output_shape, activation='sigmoid'))
 
     model.compile(loss='categorical_crossentropy',
                   optimizer='rmsprop',
