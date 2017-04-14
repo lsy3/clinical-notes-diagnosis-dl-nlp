@@ -76,3 +76,18 @@ def gru_1(input_shape, output_shape, embedding_layer):
                   metrics=['acc', 'mse'])
 
     return model
+
+def gru_2(input_shape, output_shape, embedding_layer):
+    model = Sequential()
+
+    #model.add(Input(shape=input_shape, dtype='int32'))
+    model.add(embedding_layer)
+    model.add(GRU(128, return_sequences=True))  # returns a sequence of vectors of dimension 32
+    model.add(Dense(100*output_shape, activation='softmax'))
+    model.add(Dense(output_shape, activation='softmax'))
+
+    model.compile(loss='categorical_crossentropy',
+                  optimizer='rmsprop',
+                  metrics=['acc', 'mse'])
+
+    return model
