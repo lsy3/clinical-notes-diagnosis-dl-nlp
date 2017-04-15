@@ -13,13 +13,13 @@ from keras.utils import plot_model
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--datafile',  dest='datafile', help='input pickle file', default='./data/DATA_WORDSEQV0_HADM_TOP10.p', type = str)
-    parser.add_argument('--embmatrix', dest='embmatrix', help='embedding matrix', default='./data/EMBMATRIX_WORD2VEC_v2_100dim.p', type = str)
+    parser.add_argument('--embmatrix', dest='embmatrix', help='embedding matrix', default='./data/EMBMATRIX_WORD2VEC_v2_300dim.p', type = str)
     parser.add_argument('--epoch',      dest='nb_epoch', help='number of epoch', default=50, type = int)
     parser.add_argument('--batch_size', dest='batch_size', help='batch size', default=128, type = int)
     parser.add_argument('--model_name', dest='model_name', help='model loaded from *_model.py', default='conv1d_1', type=str)
     parser.add_argument('--append_name', dest='append_name', help='load weights_model_name<append_name>', default='', type=str)
     parser.add_argument('--pre_train', dest = 'pre_train', help='continue train from pretrained para? True/False', default=False)
-    parser.add_argument('--gpu', dest = 'gpu', help='set gpu no to be used (default: 0)', default='0',type=str)
+    parser.add_argument('--gpu', dest = 'gpu', help='set gpu no to be used (default: 0)', default='1',type=str)
     parser.add_argument('--plot_model', dest = 'plot_model', help='plot the said model', default='', type=str)
     parser.add_argument('--patience', dest ='patience', help='patient for early stopper', default=5, type=int)
 
@@ -75,7 +75,7 @@ def train(args):
 
     if not os.path.isdir('./data/cache'):
         os.mkdir('./data/cache')
-    weight_name = 'weights_' + model_name + args.pre_train_append + '.h5'
+    weight_name = 'weights_' + model_name + args.append_name + '.h5'
     weights_path = join('./data/cache', weight_name)
     if pre_train:
         model.load_weights(weights_path)

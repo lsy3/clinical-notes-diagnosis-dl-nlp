@@ -103,7 +103,7 @@ def train(args):
         model.load_weights(weights_path)
     print ('checkpoint')
     checkpointer = ModelCheckpoint(filepath=weights_path, verbose=1, save_best_only=True)
-    earlystopping = EarlyStopping(monitor='val_loss', patience=5, verbose=0, mode='auto')
+    earlystopping = EarlyStopping(monitor='val_loss', patience=20, verbose=0, mode='auto')
 
     #train_sequence = np.concatenate((train_sequence, val_sequence), axis=0)
     #train_label = np.concatenate((train_label, val_label), axis=0)

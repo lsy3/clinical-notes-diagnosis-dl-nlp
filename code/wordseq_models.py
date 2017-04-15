@@ -18,6 +18,34 @@ def lstm_model_1(input_shape, output_shape, embedding_layer):
     return model
 
 
+def lstm_model_2(input_shape, output_shape, embedding_layer):
+    print('Build model...')
+    model = Sequential()
+    model.add(embedding_layer)
+    model.add(LSTM(256))
+    model.add(Dropout(0.5))
+    model.add(BatchNormalization())
+    model.add(Dense(output_shape, activation='sigmoid'))
+
+    model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['acc', 'mse'])
+    model.summary()
+    return model
+
+
+def lstm_model_3(input_shape, output_shape, embedding_layer):
+    print('Build model...')
+    model = Sequential()
+    model.add(embedding_layer)
+    model.add(LSTM(128))
+    model.add(Dropout(0.5))
+    model.add(BatchNormalization())
+    model.add(Dense(output_shape, activation='sigmoid'))
+
+    model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['acc', 'mse'])
+    model.summary()
+    return model
+
+
 def lstm_model_glove_1(input_shape, output_shape, embedding_layer):
     print('Build model...')
     model = Sequential()
