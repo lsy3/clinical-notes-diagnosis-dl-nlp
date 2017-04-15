@@ -14,7 +14,7 @@ def parse_args():
     parser.add_argument('--embmatrix', dest='embmatrix', help='embedding matrix', default='./data/EMBMATRIX_WORD2VEC_v2_100dim.p', type = str)
     parser.add_argument('--batch_size', dest='batch_size', help='batch size', default=128, type=int)
     parser.add_argument('--model_name', dest='model_name', help='model loaded from dl_model.py', default='conv1d_1', type=str)
-    parser.add_argument('--pre_train_append', dest='pre_train_append', help='load weights_model_name<pre_train_append>', default='', type=str)
+    parser.add_argument('--append_name', dest='pre_train_append', help='load weights_model_name<append_name>', default='', type=str)
     parser.add_argument('--gpu', dest = 'gpu', help='set gpu no to be used (default: all)', default='',type=str)
     parser.add_argument('--patience', dest ='patience', help='patient for early stopper', default=5, type=int)
 
