@@ -228,3 +228,19 @@ def gru_3(input_shape, output_shape, embedding_layer):
                   metrics=['acc', 'mse'])
 
     return model
+
+def gru_4(input_shape, output_shape, embedding_layer):
+    print('Build model...')
+    model = Sequential()
+    model.add(embedding_layer)
+    model.add(GRU(256, return_sequences=True))
+    model.add(Dropout(0.5))
+    model.add(BatchNormalization())
+    model.add(GRU(64))
+    model.add(Dropout(0.5))
+    model.add(BatchNormalization())
+    model.add(Dense(output_shape, activation='sigmoid'))
+
+    model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['acc', 'mse'])
+    model.summary()
+    return model
