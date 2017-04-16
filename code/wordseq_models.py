@@ -53,7 +53,7 @@ def lstm_model_4(input_shape, output_shape, embedding_layer):
     model.add(LSTM(128, return_sequences=True))
     model.add(Dropout(0.5))
     model.add(BatchNormalization())
-	model.add(LSTM(256))
+    model.add(LSTM(256, return_sequences=True))
     model.add(Dropout(0.5))
     model.add(BatchNormalization())
     model.add(LSTM(128))
