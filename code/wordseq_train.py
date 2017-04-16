@@ -3,7 +3,7 @@ import numpy as np
 import cPickle
 import argparse
 import os, sys
-import tensorflow as tf
+# import tensorflow as tf
 from os.path import join
 import wordseq_models
 from keras.callbacks import ModelCheckpoint, EarlyStopping
