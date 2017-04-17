@@ -13,14 +13,14 @@ from keras.utils import plot_model
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--datafile',  dest='datafile', help='input pickle file', default='./data/DATA_WORDSEQV0_HADM_TOP10.p', type = str)
-    parser.add_argument('--embmatrix', dest='embmatrix', help='embedding matrix', default='./data/EMBMATRIX_WORD2VEC_v2_300dim.p', type = str)
+    parser.add_argument('--embmatrix', dest='embmatrix', help='embedding matrix', default='./data/EMBMATRIXV0_WORD2VEC_v2_300dim.p', type = str)
     parser.add_argument('--epoch',      dest='nb_epoch', help='number of epoch', default=50, type = int)
     parser.add_argument('--batch_size', dest='batch_size', help='batch size', default=128, type = int)
     parser.add_argument('--model_name', dest='model_name', help='model loaded from *_model.py', default='conv1d_1', type=str)
     parser.add_argument('--append_name', dest='append_name', help='load weights_model_name<append_name>', default='', type=str)
     parser.add_argument('--pre_train', dest = 'pre_train', help='continue train from pretrained para? True/False', default=False)
     parser.add_argument('--gpu', dest = 'gpu', help='set gpu no to be used (default: 0)', default='1',type=str)
-    parser.add_argument('--plot_model', dest = 'plot_model', help='plot the said model', default='', type=str)
+    parser.add_argument('--plot_model', dest = 'plot_model', help='plot the said model', default=True)
     parser.add_argument('--patience', dest ='patience', help='patient for early stopper', default=5, type=int)
 
     if len(sys.argv) == 1:
@@ -49,6 +49,10 @@ def train(args):
     train_label = loaded_data[4]
     val_label = loaded_data[5]
 
+    # f = open('./data/dictionary_v0.p', 'wb')
+    # cPickle.dump(dictionary, f)
+    # f.close()
+
     f = open(args.embmatrix)
     embedding_matrix = cPickle.load(f)
     f.close()
@@ -70,8 +74,9 @@ def train(args):
     model = model_func(input_shape, category_number, embedding_layer)
 
     if args.plot_model:
-        plot_model(model, args.plot_model, True, False)
-        return
+        fig_name = './data/cache/' + args.model_name + '.png'
+        plot_model(model, fig_name, True, False)
+        # return
 
     if not os.path.isdir('./data/cache'):
         os.mkdir('./data/cache')

@@ -92,7 +92,7 @@ def test(args):
     test_pred = model.predict(test_sequence, batch_size = batch_size, verbose=0)
     test_pred[test_pred >= 0.5] = 1
     test_pred[test_pred < 0.5] = 0
-
+    print test_pred[:10, :]
     precision_list = np.zeros((test_label.shape[1]))
     recall_list = np.zeros((test_label.shape[1]))
     f1_list = np.zeros((test_label.shape[1]))
