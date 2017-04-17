@@ -66,9 +66,12 @@ def train(args):
     category_number = train_label.shape[1]
 
     train_matrix = np.array(map(lambda x: get_embedded_data(x, embedding_matrix), train_sequence))
+    print "train_matrix generated, shape: ", train_matrix.shape
+    val_sequence = val_sequence[:5000, :]
     val_matrix = np.array(map(lambda x: get_embedded_data(x, embedding_matrix), val_sequence))
+    print "val_matrix generated, shape: ", val_matrix.shape
     # train_matrix = train_matrix.reshape(train_matrix.shape[0], 1, train_matrix.shape[1], train_matrix.shape[2])
-    print train_matrix.shape
+
 
     # from keras.layers import Embedding
     # from keras.models import Sequential
@@ -103,11 +106,11 @@ def train(args):
     col = train_matrix.shape[2]
     if K.image_data_format() == 'channels_first':
         train_matrix = train_matrix.reshape(train_matrix.shape[0], 1, row, col)
-        print train_matrix.shape
+        val_matrix = val_matrix.reshape(val_matrix.shape[0], 1, row, col)
         input_shape = (1, row, col)
     else:
         train_matrix = train_matrix.reshape(train_matrix.shape[0], row, col, 1)
-        print train_matrix.shape
+        val_matrix = val_matrix.reshape(val_matrix.shape[0], row, col, 1)
         input_shape = (row, col, 1)
 	
     model_func = getattr(wordseq_models, model_name)
@@ -136,7 +139,7 @@ def train(args):
     model.fit(train_matrix, train_label,
               batch_size = batch_size,
               epochs = nb_epoch,
-              validation_data = [val_matrix, val_label],
+              validation_data = [val_matrix, val_label[:5000, :]],
               callbacks=[checkpointer, earlystopping])
 
 

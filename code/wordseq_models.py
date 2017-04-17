@@ -94,12 +94,11 @@ def lstm_model_6(input_shape, output_shape, embedding_layer):
 def lstm_model_7(input_shape, output_shape, embedding_layer):
 	model = Sequential()
 	model.add(embedding_layer)
-	model.add(Dropout(0.25))
 	model.add(Conv1D(256, 5, padding='valid', activation='relu', strides=1))
 	model.add(MaxPooling1D(4))
 	model.add(Conv1D(256, 5, padding='valid', activation='relu', strides=1))
 	model.add(MaxPooling1D(4))
-	model.add(LSTM(64))
+	model.add(LSTM(256))
 	model.add(Dense(output_shape, activation='sigmoid'))
 	
 	model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['acc', 'mse'])
@@ -374,10 +373,14 @@ def gru_3(input_shape, output_shape, embedding_layer):
     return model
 
 
-def gru_8(input_shape, output_shape, embedding_layer):
+def gru_4(input_shape, output_shape, embedding_layer):
+    print('Build model...')
     model = Sequential()
     model.add(embedding_layer)
-    model.add(Bidirectional(LSTM(256)))
+    model.add(GRU(256, return_sequences=True))
+    model.add(Dropout(0.5))
+    model.add(BatchNormalization())
+    model.add(GRU(64))
     model.add(Dropout(0.5))
     model.add(BatchNormalization())
     model.add(Dense(output_shape, activation='sigmoid'))
@@ -388,4 +391,13 @@ def gru_8(input_shape, output_shape, embedding_layer):
 
     return model
 
+
+def gru_8(input_shape, output_shape, embedding_layer):
+    model = Sequential()
+    model.add(embedding_layer)
+    model.add(Bidirectional(LSTM(256)))
+
+    model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['acc', 'mse'])
+    model.summary()
+    return model
 
