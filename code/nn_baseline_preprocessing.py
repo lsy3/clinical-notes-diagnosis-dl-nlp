@@ -90,12 +90,12 @@ def csv2pickle(file_name):
     f.close()
 
 
-def csv2sparse(file_name):
-    label_col = [i + 1 for i in range(10)]
+def csv2sparse(file_name, label_number):
+    label_col = [i + 1 for i in range(label_number)]
     df_label = pd.read_csv(file_name, usecols=label_col)
     label = df_label.values
 
-    df_features = pd.read_csv(file_name, usecols=[11])
+    df_features = pd.read_csv(file_name, usecols=[label_number + 1])
     features = df_features.values
     size, _ = parse(features[0][0])
     sparse_list = []
@@ -110,17 +110,30 @@ def csv2sparse(file_name):
 
 
 if __name__ == '__main__':
-    train_data, train_label, size = csv2sparse('./data/DATA_TFIDFV0_HADM_TOP50CAT_train.csv')
-    valid_data, valid_label, size = csv2sparse('./data/DATA_TFIDFV0_HADM_TOP50CAT_val.csv')
-    test_data, test_label, size = csv2sparse('./data/DATA_TFIDFV0_HADM_TOP50CAT_test.csv')
+    # train_data, train_label, size = csv2sparse('./data/DATA_TFIDFV0_HADM_TOP50CAT_train.csv')
+    # valid_data, valid_label, size = csv2sparse('./data/DATA_TFIDFV0_HADM_TOP50CAT_val.csv')
+    # test_data, test_label, size = csv2sparse('./data/DATA_TFIDFV0_HADM_TOP50CAT_test.csv')
+
+    feature_list = ['TFIDFV0', 'TFIDFV1', 'WORD2VECV0', 'WORD2VECV1', 'WORD2VECV2', 'WORD2VECV3', 'WORD2VECV4']
+    type_list = ['50', '50CAT']
+    for feature in feature_list:
+        for tp in type_list:
+            train_file_name = './data/' + feature + '/DATA_' + feature + '_HADM_TOP' + tp + '_train.csv'
+            valid_file_name = './data/' + feature + '/DATA_' + feature + '_HADM_TOP' + tp + '_train.csv'
+            test_file_name = './data/' + feature + '/DATA_' + feature + '_HADM_TOP' + tp + '_train.csv'
+            print feature, tp
+
+            train_data, train_label, size = csv2sparse(train_file_name, int(tp[:2]))
+            valid_data, valid_label, size = csv2sparse(valid_file_name, int(tp[:2]))
+            test_data, test_label, size = csv2sparse(test_file_name, int(tp[:2]))
 
     # train_data, train_label, size = csv2sparse('./data/DATA_WORD2VEC_HADM_TOP10_train.csv')
     # valid_data, valid_label, size = csv2sparse('./data/DATA_WORD2VEC_HADM_TOP10_val.csv')
     # test_data, test_label, size = csv2sparse('./data/DATA_WORD2VEC_HADM_TOP10_test.csv')
 
-    f = open('./data/tfidf_v0_top50.p', 'wb')
-    for obj in [train_data, valid_data, test_data, train_label, valid_label, test_label, size]:
-        cPickle.dump(obj, f, protocol=cPickle.HIGHEST_PROTOCOL)
-    f.close()
+            f = open('./data/BASELINE/' + feature + '_' + tp + '.p', 'wb')
+            for obj in [train_data, valid_data, test_data, train_label, valid_label, test_label, size]:
+                cPickle.dump(obj, f, protocol=cPickle.HIGHEST_PROTOCOL)
+            f.close()
 
 

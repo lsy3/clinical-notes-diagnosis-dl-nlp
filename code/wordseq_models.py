@@ -156,17 +156,17 @@ def lstm_model_10(input_shape, output_shape, embedding_layer):
 	
 	
 def rnn_model_1(input_shape, output_shape, embedding_layer):
-	print('Build model...')
-	model = Sequential()
-	model.add(embedding_layer)
-	model.add(SimpleRNN(128, return_sequences=True))
-	model.add(SimpleRNN(128, return_sequences=True))
-	model.add(SimpleRNN(128))
-	model.add(Dense(output_shape, activation='sigmoid'))
+    print('Build model...')
+    model = Sequential()
+    model.add(embedding_layer)
+    model.add(SimpleRNN(128, return_sequences=True))
+    model.add(SimpleRNN(128, return_sequences=True))
+    model.add(SimpleRNN(128))
+    model.add(Dense(output_shape, activation='sigmoid'))
 
-	model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['acc', 'mse'])
-	model.summary()
-	return model
+    model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['acc', 'mse'])
+    model.summary()
+    return model
 	
 
 def lstm_model_glove_1(input_shape, output_shape, embedding_layer):
@@ -247,34 +247,6 @@ def conv1d_3(input_shape, output_shape, embedding_layer):
                   optimizer='rmsprop',
                   metrics=['acc', 'mse'])
 
-    return model
-	
-	
-def conv1d_4(input_shape, output_shape, embedding_layer):
-    print('Build model...')
-    model = Sequential()
-    model.add(embedding_layer)
-    model.add(ZeroPadding1D(1, input_shape=input_shape))
-    model.add(Conv1D(64, 3, activation='relu'))
-    model.add(ZeroPadding1D(1))
-    model.add(Conv1D(64, 3, activation='relu'))
-    model.add(MaxPooling1D(2, strides=2))
-
-    model.add(ZeroPadding1D(1))
-    model.add(Conv1D(128, 3, activation='relu'))
-    model.add(ZeroPadding1D(1))
-    model.add(Conv1D(128, 3, activation='relu'))
-    model.add(MaxPooling1D(2, strides=2))
-
-    model.add(Flatten())
-    model.add(Dense(1024, activation='relu'))
-    model.add(Dropout(0.5))
-    model.add(Dense(128, activation='relu'))
-    model.add(Dropout(0.5))
-    model.add(Dense(output_shape, activation='sigmoid'))
-
-    model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['acc', 'mse'])
-    model.summary()
     return model
 	
 	

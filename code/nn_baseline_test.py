@@ -3,15 +3,18 @@ import argparse
 import sys
 from os.path import join
 import numpy as np
-import dl_models
+import nn_baseline_models
 from sklearn.metrics import confusion_matrix
+import os
+import pandas as pd
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch_size', dest='batch_size', help='batch size', default=128, type=int)
     parser.add_argument('--model_name', dest='model_name', help='model loaded from dl_model.py', default='nn_model_2', type=str)
-    parser.add_argument('--data_file', dest='data_file', help='data file name', default='tfidf_v0_top10', type=str)
+    parser.add_argument('--datafile', dest='data_file', help='data file name', default='tfidf_v0_top10', type=str)
+    parser.add_argument('--gpu', dest='gpu', help='set gpu no to be used (default: 0)', default='0', type=str)
     if len(sys.argv) == 1:
         parser.print_help()
         print ('Run Default Settings ....... ')
@@ -41,8 +44,7 @@ def batch_generator(X, y, batch_size, shuffle, feature_size):
             counter = 0
 
 
-def test_multi_label():
-    args = parse_args()
+def test_multi_label(args):
     model_name = args.model_name
     batch_size = args.batch_size
     data_file = args.data_file
@@ -53,10 +55,10 @@ def test_multi_label():
         loaded_data.append(cPickle.load(f))
     f.close()
 
-    test_data = loaded_data[0]
-    test_label = loaded_data[3]
-    # test_data = loaded_data[2]
-    # test_label = loaded_data[5]
+    # test_data = loaded_data[0]
+    # test_label = loaded_data[3]
+    test_data = loaded_data[2]
+    test_label = loaded_data[5]
     # from keras.utils.np_utils import to_categorical
     # test_label = to_categorical(test_label, num_classes=2)
     feature_size = loaded_data[6]
@@ -64,9 +66,9 @@ def test_multi_label():
     file_path = './data/cache'
     weights_name = 'weight_' + model_name + '_' + data_file + '.h5'
 
-    function_list = dl_models.get_function_dict()
-    model_func = function_list[model_name]
+    model_func = getattr(nn_baseline_models, model_name)
     model = model_func(feature_size)
+
     model.load_weights(join(file_path, weights_name))
     print('Loaded model from disk')
     # convert sparse test data to dense
@@ -147,7 +149,7 @@ def test_multi_model():
         file_path = './data/cache'
         weights_name = 'weight_' + model_name + '_' + data_file + '_' + str(i+1) + '.h5'
 
-        function_list = dl_models.get_function_dict()
+        function_list = nn_baseline_models.get_function_dict()
         model_func = function_list[model_name]
         model = model_func(feature_size)
         model.load_weights(join(file_path, weights_name))
@@ -184,5 +186,120 @@ def test_multi_model():
     print "f1: ", np.mean(f1_list), "std: ", np.std(f1_list)
 
 
+def calc_performance(y_true, y_pred):
+    precision_list = np.zeros((y_true.shape[1]))
+    recall_list = np.zeros((y_true.shape[1]))
+    f1_list = np.zeros((y_true.shape[1]))
+    accuracy_list = np.zeros((y_true.shape[1]))
+
+    for i in range(y_true.shape[1]):
+        cm = confusion_matrix(y_true[:, i], y_pred[:, i])
+        tn = cm[0, 0]
+        fp = cm[0, 1]
+        fn = cm[1, 0]
+        tp = cm[1, 1]
+        # tn | fp
+        # ---|---
+        # fn | tp
+        precision = tp / float(tp + fp)
+        precision_list[i] = precision
+        recall = tp / float(tp + fn)
+        recall_list[i] = recall
+        f1 = 2 * (precision * recall / float(precision + recall))
+        f1_list[i] = f1
+        accuracy = (tp + tn) / float(tp + tn + fp + fn)
+        accuracy_list[i] = accuracy
+
+    print "precision: ", np.mean(precision_list), "std: ", np.std(precision_list)
+    print "recall: ", np.mean(recall_list), "std: ", np.std(recall_list)
+    print "accuracy: ", np.mean(accuracy_list), "std: ", np.std(accuracy_list)
+    print "f1: ", np.mean(f1_list), "std: ", np.std(f1_list)
+    print "precision_list: ", precision_list
+    print "recall_list: ", recall_list
+    print "accuracy_list: ", accuracy_list
+    print "f1_list: ", f1_list
+
+    res = [np.mean(precision_list), np.std(precision_list), np.mean(recall_list), np.std(recall_list),
+           np.mean(accuracy_list), np.std(accuracy_list), np.mean(f1_list), np.std(f1_list)]
+    return res
+
+
+def test_multi_label_para(model_name):
+    feature_file_list = ['TFIDFV0', 'TFIDFV1', 'WORD2VECV0', 'WORD2VECV1', 'WORD2VECV2', 'WORD2VECV3', 'WORD2VECV4']
+    data_file_list = ['10', '10CAT', '50', '50CAT']
+    test_res_list = []
+    train_res_list = []
+    column_list = []
+    for i in feature_file_list:
+        for j in data_file_list:
+            data_file = i + '_' + j
+            full_path = './data/BASELINE/' + data_file + '.p'
+
+            f = open(full_path, 'rb')
+            loaded_data = []
+            for ii in range(7):  # [train_data, valid_data, test_data, train_label, valid_label, test_label, size]:
+                loaded_data.append(cPickle.load(f))
+            f.close()
+
+            train_data = loaded_data[0]
+            valid_data = loaded_data[1]
+            test_data = loaded_data[2]
+            train_label = loaded_data[3]
+            valid_label = loaded_data[4]
+            test_label = loaded_data[5]
+            feature_size = loaded_data[6]
+
+            file_path = './data/cache'
+            weights_name = 'weight_' + model_name + '_' + data_file + '.h5'
+
+            model_func = getattr(nn_baseline_models, model_name)
+            model = model_func(feature_size)
+
+            model.load_weights(join(file_path, weights_name))
+            print('Loaded model from disk')
+            # convert sparse test data to dense
+            test_data_dense = np.zeros((len(test_data), feature_size))
+            for i in range(len(test_data)):
+                for j in test_data[i]:
+                    test_data_dense[i, j[0]] = j[1]
+
+
+            test_pred = model.predict(test_data_dense, batch_size=256, verbose=0)
+            test_pred[test_pred >= 0.5] = 1
+            test_pred[test_pred < 0.5] = 0
+
+            test_res = calc_performance(test_label, test_pred)
+            test_res_list.append(test_res)
+
+            del test_data_dense
+
+            # get train metrics
+            train_data_dense = np.zeros((len(train_data), feature_size))
+            for i in range(len(train_data)):
+                for j in train_data[i]:
+                    train_data_dense[i, j[0]] = j[1]
+
+
+            train_pred = model.predict(train_data_dense, batch_size=256, verbose=0)
+            train_pred[train_pred >= 0.5] = 1
+            train_pred[train_pred < 0.5] = 0
+
+            train_res = calc_performance(train_label, train_pred)
+            train_res_list.append(train_res)
+            column_list.append(i + '_' + j)
+
+
+
+    df = pd.DataFrame(test_res_list, column = column_list)
+    df.to_csv('./data/' + model_name + '_test_res.csv')
+    df = pd.DataFrame(train_res_list, column = column_list)
+    df.to_csv('./data/' + model_name + '_train_res.csv')
+
+
 if __name__ == '__main__':
-    test_multi_label()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--gpu', dest='gpu', help='gpu_number', default=0, type=int)
+    args = parser.parse_args()
+    model_name = 'nn_model_' + str(args.gpu)
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
+    test_multi_label_para(model_name)
