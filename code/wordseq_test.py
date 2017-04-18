@@ -47,6 +47,39 @@ def batch_generator(X, y, batch_size, shuffle, feature_size):
                 np.random.shuffle(sample_index)
             counter = 0
 
+def evaluate(test_label, test_pred):
+    precision_list = np.zeros((test_label.shape[1]))
+    recall_list = np.zeros((test_label.shape[1]))
+    f1_list = np.zeros((test_label.shape[1]))
+    accuracy_list = np.zeros((test_label.shape[1]))
+    for i in range(test_label.shape[1]):
+        cm = confusion_matrix(test_label[:, i],test_pred[:, i])
+        tn = cm[0, 0]
+        fp = cm[0, 1]
+        fn = cm[1, 0]
+        tp = cm[1, 1]
+        # tn | fp
+        # ---|---
+        # fn | tp
+        precision = tp / float(tp + fp)
+        precision_list[i] = precision
+        recall = tp / float(tp + fn)
+        recall_list[i] = recall
+        f1 = 2 * (precision * recall / float(precision + recall))
+        f1_list[i] = f1
+        accuracy = (tp + tn) / float(tp + tn + fp + fn)
+        accuracy_list[i] = accuracy
+        print cm
+    out = {'prec_mean': np.mean(precision_list),
+           'prec_std': np.std(precision_list),
+           'recall_mean': np.mean(recall_list),
+           'recall_std': np.std(recall_list),
+           'acc_mean': np.mean(accuracy_list),
+           'acc_std': np.std(accuracy_list),
+           'f1_mean': np.mean(f1_list),
+           'f1_std': np.std(f1_list)}
+    return out
+
 
 def test(args):
     
@@ -59,10 +92,10 @@ def test(args):
     f.close()
 
     dictionary = loaded_data[0]
-    #train_sequence = loaded_data[1]
+    train_sequence = loaded_data[1]
     #val_sequence = loaded_data[2]
     test_sequence = loaded_data[3]
-    #train_label = loaded_data[4]
+    train_label = loaded_data[4]
     #val_label = loaded_data[5]
     test_label = loaded_data[6]
 
@@ -93,41 +126,29 @@ def test(args):
     if args.argmax == True:
         test_pred = model.predict(test_sequence, batch_size = batch_size, verbose=0)
         test_pred[np.argmax(test_pred, axis=0)] = 1
+        train_pred = model.predict(train_sequence, batch_size=batch_size, verbose=0)
+        train_pred[np.argmax(train_pred, axis=0)] = 1
     else:
         test_pred = model.predict(test_sequence, batch_size = batch_size, verbose=0)
         test_pred[test_pred >= args.prob] = 1
         test_pred[test_pred < args.prob] = 0
-		
-    print test_pred[:10, :]
-    print "--- ground truth below ---"
-    print test_label[:10, :]
-    precision_list = np.zeros((test_label.shape[1]))
-    recall_list = np.zeros((test_label.shape[1]))
-    f1_list = np.zeros((test_label.shape[1]))
-    accuracy_list = np.zeros((test_label.shape[1]))
-    for i in range(test_label.shape[1]):
-        cm = confusion_matrix(test_label[:, i],test_pred[:, i])
-        tn = cm[0, 0]
-        fp = cm[0, 1]
-        fn = cm[1, 0]
-        tp = cm[1, 1]
-        # tn | fp
-        # ---|---
-        # fn | tp
-        precision = tp / float(tp + fp)
-        precision_list[i] = precision
-        recall = tp / float(tp + fn)
-        recall_list[i] = recall
-        f1 = 2 * (precision * recall / float(precision + recall))
-        f1_list[i] = f1
-        accuracy = (tp + tn) / float(tp + tn + fp + fn)
-        accuracy_list[i] = accuracy
-        print cm
+        train_pred = model.predict(train_sequence, batch_size=batch_size, verbose=0)
+        train_pred[train_pred >= args.prob] = 1
+        train_pred[train_pred < args.prob] = 0
 
-    print "precision: ", np.mean(precision_list), "std: ", np.std(precision_list)
-    print "recall: ", np.mean(recall_list), "std: ", np.std(recall_list)
-    print "accuracy: ", np.mean(accuracy_list), "std: ", np.std(accuracy_list)
-    print "f1: ", np.mean(f1_list), "std: ", np.std(f1_list)
+    trainEval = evaluate(train_label, train_pred)
+    testEval = evaluate(test_label, test_pred)
+
+    print "train: "
+    print "precision: {prec_mean} std: {prec_std}".format(**trainEval)
+    print "recall: {recall_mean} std: {recall_std}".format(**trainEval)
+    print "accuracy: {acc_mean} std: {acc_std}".format(**trainEval)
+    print "f1: {f1_mean} std: {f1_std}".format(**trainEval)
+    print "test:"
+    print "precision: {prec_mean} std: {prec_std}".format(**testEval)
+    print "recall: {recall_mean} std: {recall_std}".format(**testEval)
+    print "accuracy: {acc_mean} std: {acc_std}".format(**testEval)
+    print "f1: {f1_mean} std: {f1_std}".format(**testEval)
 
 
 if __name__ == '__main__':

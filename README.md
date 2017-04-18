@@ -31,11 +31,11 @@ Final Report (draft): [overleaf link](https://www.overleaf.com/8371794wnkynjkydw
 1. Logging in via SSH (see Docker w/ GPU).
     * If you can't connect to jupyter, the VM might be down or it might need to be initialized via 'screen jupyter notebook'
 1. Uploading a file:
-    * scp file-to-upload docker-user@52.179.1.29:~
+    * scp -i path-to-git-root/id_rsa file-to-upload docker-user@52.179.1.29:~
 
 ### Docker w/ GPU (for deep learning) [azure setup guide](https://github.com/NVIDIA/nvidia-docker/wiki/Deploy-on-Azure)
 1. make sure you have id_rsa (update your git repo using 'git pull')
-1. ssh docker-user@52.179.1.29 -i path-to-git-root/id_rsa
+1. ssh -i path-to-git-root/id_rsa docker-user@52.179.1.29
 1. source activate cse6250
 
 ### Folder Structure
