@@ -17,7 +17,7 @@ def parse_args():
     parser.add_argument('--append_name', dest='pre_train_append', help='load weights_model_name<append_name>', default='', type=str)
     parser.add_argument('--gpu', dest = 'gpu', help='set gpu no to be used (default: all)', default='',type=str)
     parser.add_argument('--patience', dest ='patience', help='patient for early stopper', default=5, type=int)
-
+    parser.add_argument('--prob', dest ='prob', help='prob for activate the label', default=0.5, type=float)
     if len(sys.argv) == 1:
         parser.print_help()
         print ('Run Default Settings ....... ')
@@ -124,8 +124,8 @@ def test(args):
     model.load_weights(join(file_path, weights_name))
     print('Loaded model from disk')
     test_pred = model.predict(test_sequence, batch_size = batch_size, verbose=0)
-    test_pred[test_pred >= 0.5] = 1
-    test_pred[test_pred < 0.5] = 0
+    test_pred[test_pred >= args.prob] = 1
+    test_pred[test_pred < args.prob] = 0
     print test_pred[:10, :]
     train_pred = model.predict(train_sequence, batch_size = batch_size, verbose=0)
     train_pred[train_pred >= 0.5] = 1
