@@ -109,7 +109,7 @@ def lstm_model_7(input_shape, output_shape, embedding_layer):
 def lstm_model_8(input_shape, output_shape, embedding_layer):
     model = Sequential()
     model.add(embedding_layer)
-    model.add(Bidirectional(GRU(256)))
+    model.add(Bidirectional(LSTM(256)))
     model.add(Dropout(0.5))
     model.add(BatchNormalization())
     model.add(Dense(output_shape, activation='sigmoid'))
@@ -134,6 +134,23 @@ def lstm_model_9(input_shape, output_shape, embedding_layer):
                   optimizer='rmsprop',
                   metrics=['acc', 'mse'])
 
+    return model
+	
+	
+def lstm_model_10(input_shape, output_shape, embedding_layer):
+    print('Build model...')
+    model = Sequential()
+    model.add(embedding_layer)
+    model.add(Bidirectional(LSTM(128, return_sequences=True)))
+    model.add(Dropout(0.5))
+    model.add(BatchNormalization())
+    model.add(Bidirectional(LSTM(32)))
+    model.add(Dropout(0.5))
+    model.add(BatchNormalization())
+    model.add(Dense(output_shape, activation='sigmoid'))
+
+    model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['acc', 'mse'])
+    model.summary()
     return model
 
 	
@@ -231,27 +248,109 @@ def conv1d_3(input_shape, output_shape, embedding_layer):
                   metrics=['acc', 'mse'])
 
     return model
+	
+	
+def conv1d_4(input_shape, output_shape, embedding_layer):
+    print('Build model...')
+    model = Sequential()
+    model.add(embedding_layer)
+    model.add(ZeroPadding1D(1, input_shape=input_shape))
+    model.add(Conv1D(64, 3, activation='relu'))
+    model.add(ZeroPadding1D(1))
+    model.add(Conv1D(64, 3, activation='relu'))
+    model.add(MaxPooling1D(2, strides=2))
+
+    model.add(ZeroPadding1D(1))
+    model.add(Conv1D(128, 3, activation='relu'))
+    model.add(ZeroPadding1D(1))
+    model.add(Conv1D(128, 3, activation='relu'))
+    model.add(MaxPooling1D(2, strides=2))
+
+    model.add(Flatten())
+    model.add(Dense(1024, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(128, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(output_shape, activation='sigmoid'))
+
+    model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['acc', 'mse'])
+    model.summary()
+    return model
+	
+	
+def conv1d_4(input_shape, output_shape, embedding_layer):
+    print('Build model...')
+    model = Sequential()
+    model.add(embedding_layer)
+    model.add(ZeroPadding1D(1, input_shape=input_shape))
+    model.add(Conv1D(64, 3, activation='relu'))
+    model.add(ZeroPadding1D(1))
+    model.add(Conv1D(64, 3, activation='relu'))
+    model.add(MaxPooling1D(2, strides=2))
+
+    model.add(ZeroPadding1D(1))
+    model.add(Conv1D(128, 3, activation='relu'))
+    model.add(ZeroPadding1D(1))
+    model.add(Conv1D(128, 3, activation='relu'))
+    model.add(MaxPooling1D(2, strides=2))
+
+    model.add(Flatten())
+    model.add(Dense(1024, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(128, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(output_shape, activation='sigmoid'))
+
+    model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['acc', 'mse'])
+    model.summary()
+    return model
 
 
-def conv1d_8(input_shape, output_shape, embedding_layer):
-    sequence_input = Input(shape=input_shape, dtype='int32')
+def conv1d_5(input_shape, output_shape, embedding_layer):
+    print('Build model...')
+    model = Sequential()
+    model.add(embedding_layer)
+    model.add(ZeroPadding1D(1, input_shape=input_shape))
+    model.add(Conv1D(64, 3, activation='relu'))
+    model.add(ZeroPadding1D(1))
+    model.add(Conv1D(64, 3, activation='relu'))
+    model.add(MaxPooling1D(2, strides=2))
 
-    embedded_sequences = embedding_layer(sequence_input)
-    x = Conv1D(128, 5, activation='relu', padding='same')(embedded_sequences)
-    x = MaxPooling1D(5, padding='same')(x)
-    x = Conv1D(128, 5, activation='relu', padding='same')(x)
-    x = MaxPooling1D(5, padding='same')(x)
-    x = Conv1D(128, 5, activation='relu', padding='same')(x)
-    x = MaxPooling1D(35, padding='same')(x)  # global max pooling
-    x = Flatten()(x)
-    x = Dense(128, activation='relu')(x)
-    preds = Dense(output_shape, activation='sigmoid')(x)
+    model.add(ZeroPadding1D(1))
+    model.add(Conv1D(128, 3, activation='relu'))
+    model.add(ZeroPadding1D(1))
+    model.add(Conv1D(128, 3, activation='relu'))
+    model.add(MaxPooling1D(2, strides=2))
+	
+    model.add(ZeroPadding1D(1))
+    model.add(Conv1D(256, 3, activation='relu'))
+    model.add(ZeroPadding1D(1))
+    model.add(Conv1D(256, 3, activation='relu'))
+    model.add(MaxPooling1D(2, strides=2))
+	
+    model.add(ZeroPadding1D(1))
+    model.add(Conv1D(128, 3, activation='relu'))
+    model.add(ZeroPadding1D(1))
+    model.add(Conv1D(128, 3, activation='relu'))
+    model.add(MaxPooling1D(2, strides=2))
+	
+    model.add(ZeroPadding1D(1))
+    model.add(Conv1D(64, 3, activation='relu'))
+    model.add(ZeroPadding1D(1))
+    model.add(Conv1D(64, 3, activation='relu'))
+    model.add(MaxPooling1D(2, strides=2))
 
-    model = Model(sequence_input, preds)
-    model.compile(loss='binary_crossentropy',
-                  optimizer='rmsprop',
-                  metrics=['acc', 'mse'])
+    model.add(Flatten())
+    model.add(Dense(4096, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(1024, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(128, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(output_shape, activation='sigmoid'))
 
+    model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['acc', 'mse'])
+    model.summary()
     return model
 
 
@@ -392,12 +491,33 @@ def gru_4(input_shape, output_shape, embedding_layer):
     return model
 
 
-def gru_8(input_shape, output_shape, embedding_layer):
+def gru_5(input_shape, output_shape, embedding_layer):
     model = Sequential()
     model.add(embedding_layer)
-    model.add(Bidirectional(LSTM(256)))
-
+    model.add(Bidirectional(GRU(256)))
+    model.add(Dropout(0.5))
+    model.add(BatchNormalization())
+    model.add(Dense(output_shape, activation='sigmoid'))
     model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['acc', 'mse'])
     model.summary()
+    return model
+	
+	
+def gru_6(input_shape, output_shape, embedding_layer):
+    print('Build model...')
+    model = Sequential()
+    model.add(embedding_layer)
+    model.add(Bidirectional(GRU(128, return_sequences=True)))
+    model.add(Dropout(0.5))
+    model.add(BatchNormalization())
+    model.add(Bidirectional(GRU(32)))
+    model.add(Dropout(0.5))
+    model.add(BatchNormalization())
+    model.add(Dense(output_shape, activation='sigmoid'))
+
+    model.compile(loss='binary_crossentropy',
+                  optimizer='rmsprop',
+                  metrics=['acc', 'mse'])
+
     return model
 
