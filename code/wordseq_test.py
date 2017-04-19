@@ -18,6 +18,7 @@ def parse_args():
     parser.add_argument('--gpu', dest = 'gpu', help='set gpu no to be used (default: all)', default='',type=str)
     parser.add_argument('--patience', dest ='patience', help='patient for early stopper', default=5, type=int)
     parser.add_argument('--prob', dest ='prob', help='prob for activate the label', default=0.5, type=float)
+    parser.add_argument('--argmax', dest='argmax', help='argmax trigger', default=False)
     if len(sys.argv) == 1:
         parser.print_help()
         print ('Run Default Settings ....... ')
@@ -80,7 +81,6 @@ def evaluate(test_label, test_pred):
     return out
 
 
-
 def test(args):
     
     model_name = args.model_name
@@ -123,13 +123,18 @@ def test(args):
     model = model_func(input_shape, category_number, embedding_layer)
     model.load_weights(join(file_path, weights_name))
     print('Loaded model from disk')
-    test_pred = model.predict(test_sequence, batch_size = batch_size, verbose=0)
-    test_pred[test_pred >= args.prob] = 1
-    test_pred[test_pred < args.prob] = 0
-    print test_pred[:10, :]
-    train_pred = model.predict(train_sequence, batch_size = batch_size, verbose=0)
-    train_pred[train_pred >= 0.5] = 1
-    train_pred[train_pred < 0.5] = 0
+    if args.argmax == True:
+        test_pred = model.predict(test_sequence, batch_size = batch_size, verbose=0)
+        test_pred[np.argmax(test_pred, axis=0)] = 1
+        train_pred = model.predict(train_sequence, batch_size=batch_size, verbose=0)
+        train_pred[np.argmax(train_pred, axis=0)] = 1
+    else:
+        test_pred = model.predict(test_sequence, batch_size = batch_size, verbose=0)
+        test_pred[test_pred >= args.prob] = 1
+        test_pred[test_pred < args.prob] = 0
+        train_pred = model.predict(train_sequence, batch_size=batch_size, verbose=0)
+        train_pred[train_pred >= args.prob] = 1
+        train_pred[train_pred < args.prob] = 0
 
     trainEval = evaluate(train_label, train_pred)
     testEval = evaluate(test_label, test_pred)
@@ -144,6 +149,7 @@ def test(args):
     print "recall: {recall_mean} std: {recall_std}".format(**testEval)
     print "accuracy: {acc_mean} std: {acc_std}".format(**testEval)
     print "f1: {f1_mean} std: {f1_std}".format(**testEval)
+
 
 if __name__ == '__main__':
     args = parse_args()
