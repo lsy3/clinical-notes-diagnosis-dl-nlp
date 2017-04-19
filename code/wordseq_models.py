@@ -374,10 +374,11 @@ def conv1d_6(input_shape, output_shape, embedding_layer):
 
     return model
 
-def conv2d_1(input_shape, output_shape):
+def conv2d_1(input_shape, output_shape, embedding_layer):
 
     print('Build model...')
     model = Sequential()
+    model.add(embedding_layer)
     model.add(ZeroPadding2D((1, 1), input_shape=input_shape))
     model.add(Convolution2D(64, 3, 3, activation='relu'))
     model.add(ZeroPadding2D((1, 1)))
