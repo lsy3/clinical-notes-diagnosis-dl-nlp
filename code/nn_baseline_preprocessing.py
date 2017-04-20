@@ -115,12 +115,12 @@ if __name__ == '__main__':
     # test_data, test_label, size = csv2sparse('./data/DATA_TFIDFV0_HADM_TOP50CAT_test.csv')
 
     feature_list = ['TFIDFV0', 'TFIDFV1', 'WORD2VECV0', 'WORD2VECV1', 'WORD2VECV2', 'WORD2VECV3', 'WORD2VECV4']
-    type_list = ['50', '50CAT']
+    type_list = ['10', '10CAT', '50', '50CAT']
     for feature in feature_list:
         for tp in type_list:
             train_file_name = './data/' + feature + '/DATA_' + feature + '_HADM_TOP' + tp + '_train.csv'
-            valid_file_name = './data/' + feature + '/DATA_' + feature + '_HADM_TOP' + tp + '_train.csv'
-            test_file_name = './data/' + feature + '/DATA_' + feature + '_HADM_TOP' + tp + '_train.csv'
+            valid_file_name = './data/' + feature + '/DATA_' + feature + '_HADM_TOP' + tp + '_val.csv'
+            test_file_name = './data/' + feature + '/DATA_' + feature + '_HADM_TOP' + tp + '_test.csv'
             print feature, tp
 
             train_data, train_label, size = csv2sparse(train_file_name, int(tp[:2]))

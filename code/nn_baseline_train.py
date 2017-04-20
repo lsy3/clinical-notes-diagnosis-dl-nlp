@@ -17,7 +17,7 @@ def parse_args():
     parser.add_argument('--datafile', dest='data_file', help='data file name', default='tfidf_v0_top10', type=str)
     parser.add_argument('--gpu', dest = 'gpu', help='set gpu no to be used (default: 0)', default='0',type=str)
     parser.add_argument('--plot_model', dest = 'plot_model', help='plot the said model', default=True)
-    parser.add_argument('--patience', dest ='patience', help='patient for early stopper', default=5, type=int)
+    parser.add_argument('--patience', dest ='patience', help='patient for early stopper', default=10, type=int)
 
 
 
@@ -59,7 +59,7 @@ def sparse2dense(data, feature_size):
     return dense_data
 
 
-def train(model_name, weights_path, train_data, train_label, valid_data, valid_label, feature_size, batch_size = 256, nb_epoch = 300, pre_train = False):
+def train(model_name, weights_path, train_data, train_label, valid_data, valid_label, feature_size, patience = 10, batch_size = 256, nb_epoch = 300, pre_train = False):
     model_func = getattr(nn_baseline_models, model_name)
     output_shape = train_label.shape[1]
     model = model_func(feature_size, output_shape)
@@ -68,7 +68,7 @@ def train(model_name, weights_path, train_data, train_label, valid_data, valid_l
         model.load_weights(weights_path)
     print ('checkpoint')
     checkpointer = ModelCheckpoint(filepath=weights_path, verbose=1, save_best_only=True)
-    earlystopping = EarlyStopping(monitor='val_loss', patience=20, verbose=0, mode='auto')
+    earlystopping = EarlyStopping(monitor='val_loss', patience=patience, verbose=0, mode='auto')
     # model.fit_generator(generator=batch_generator(train_data, train_label, batch_size, True, feature_size),
     #                     nb_epoch=nb_epoch,
     #                     validation_data=batch_generator(valid_data, valid_label, batch_size, True, feature_size),
@@ -90,6 +90,7 @@ def train_multi_label(args):
     model_name = args.model_name
     pre_train = args.pre_train
     data_file = args.data_file
+    patience = args.patience
     full_path = './data/' + data_file + '.p'
     f = open(full_path, 'rb')
     loaded_data = []
@@ -120,7 +121,7 @@ def train_multi_label(args):
         os.mkdir('./data/cache')
     weight_name = 'weight_' + model_name + '_' + data_file + '.h5'
     weights_path = join('./data/cache', weight_name)
-    train(model_name, weights_path, train_data, train_label, valid_data, valid_label, feature_size, batch_size, nb_epoch,
+    train(model_name, weights_path, train_data, train_label, valid_data, valid_label, feature_size, patience, batch_size, nb_epoch,
           pre_train)
 
 
@@ -157,7 +158,9 @@ def train_multi_label_auto():
 
 
 def train_multi_label_para(model_name):
-    feature_file_list = ['TFIDFV0', 'TFIDFV1', 'WORD2VECV0', 'WORD2VECV1', 'WORD2VECV2', 'WORD2VECV3', 'WORD2VECV4']
+    # feature_file_list = ['TFIDFV0', 'TFIDFV1', 'WORD2VECV0', 'WORD2VECV1', 'WORD2VECV2', 'WORD2VECV3', 'WORD2VECV4']
+    feature_file_list = ['TFIDFV0', 'TFIDFV1']
+    # data_file_list = ['10', '10CAT', '50', '50CAT']
     data_file_list = ['10', '10CAT', '50', '50CAT']
     for i in feature_file_list:
         for j in data_file_list:
@@ -236,7 +239,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--gpu', dest='gpu', help='gpu_number', default=0, type=int)
     args = parser.parse_args()
+    n = args.gpu
     model_name = 'nn_model_' + str(args.gpu)
+    if args.gpu == 2:
+        args.gpu = 0
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
     train_multi_label_para(model_name)
 

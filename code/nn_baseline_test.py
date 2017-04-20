@@ -4,7 +4,7 @@ import sys
 from os.path import join
 import numpy as np
 import nn_baseline_models
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import *
 import os
 import pandas as pd
 
@@ -186,50 +186,84 @@ def test_multi_model():
     print "f1: ", np.mean(f1_list), "std: ", np.std(f1_list)
 
 
-def calc_performance(y_true, y_pred):
+def calc_performance(y_true, y_pred, prob = 0.5):
+    pred_label = np.copy(y_pred)
+    pred_label[pred_label >= prob] = 1
+    pred_label[pred_label < prob] = 0
+
     precision_list = np.zeros((y_true.shape[1]))
     recall_list = np.zeros((y_true.shape[1]))
     f1_list = np.zeros((y_true.shape[1]))
     accuracy_list = np.zeros((y_true.shape[1]))
+    auc_list = np.zeros((y_true.shape[1]))
+    hamming_loss_list = np.zeros((y_true.shape[1]))
+    auc_macro_list =np.zeros((y_true.shape[1]))
+    auc_weighted_list = np.zeros((y_true.shape[1]))
+
 
     for i in range(y_true.shape[1]):
-        cm = confusion_matrix(y_true[:, i], y_pred[:, i])
-        tn = cm[0, 0]
-        fp = cm[0, 1]
-        fn = cm[1, 0]
-        tp = cm[1, 1]
-        # tn | fp
-        # ---|---
-        # fn | tp
-        precision = tp / float(tp + fp)
-        precision_list[i] = precision
-        recall = tp / float(tp + fn)
-        recall_list[i] = recall
-        f1 = 2 * (precision * recall / float(precision + recall))
-        f1_list[i] = f1
-        accuracy = (tp + tn) / float(tp + tn + fp + fn)
-        accuracy_list[i] = accuracy
+        # cm = confusion_matrix(y_true[:, i], pred_label[:, i])
+        # tn = cm[0, 0]
+        # fp = cm[0, 1]
+        # fn = cm[1, 0]
+        # tp = cm[1, 1]
+        # # tn | fp
+        # # ---|---
+        # # fn | tp
+        # precision = tp / float(tp + fp)
+        # precision_list[i] = precision
+        # recall = tp / float(tp + fn)
+        # recall_list[i] = recall
+        # f1 = 2 * (precision * recall / float(precision + recall))
+        # f1_list[i] = f1
+        # accuracy = (tp + tn) / float(tp + tn + fp + fn)
+        # accuracy_list[i] = accuracy
+        sk_precision = precision_score(y_true[:, i], pred_label[:, i])
+        sk_recall = recall_score(y_true[:, i], pred_label[:, i])
+        sk_f1 = f1_score(y_true[:, i], pred_label[:, i])
+        sk_accuracy = accuracy_score(y_true[:, i], pred_label[:, i])
+        # fpr, tpr, thresholds = roc_curve(y_true[:, i], pred_label[:, i], pos_label=2)
+        # print 'fpr, :', fpr
+        # print 'tpr, :', tpr
+        # sk_auc = auc(fpr, tpr)
 
-    print "precision: ", np.mean(precision_list), "std: ", np.std(precision_list)
-    print "recall: ", np.mean(recall_list), "std: ", np.std(recall_list)
-    print "accuracy: ", np.mean(accuracy_list), "std: ", np.std(accuracy_list)
-    print "f1: ", np.mean(f1_list), "std: ", np.std(f1_list)
-    print "precision_list: ", precision_list
-    print "recall_list: ", recall_list
-    print "accuracy_list: ", accuracy_list
-    print "f1_list: ", f1_list
+        sk_hamming_loss = hamming_loss(y_true[:, i], pred_label[:, i])
+        sk_auc_macro = roc_auc_score(y_true[:, i], y_pred[:, i])
+        sk_auc_weighted = roc_auc_score(y_true[:, i], y_pred[:, i], average='weighted')
+        precision_list[i] = sk_precision
+        recall_list[i] = sk_recall
+        f1_list[i] = sk_f1
+        accuracy_list[i] = sk_accuracy
+        hamming_loss_list[i] = sk_hamming_loss
+        auc_macro_list[i] = sk_auc_macro
+        auc_weighted_list[i] = sk_auc_weighted
 
-    res = [np.mean(precision_list), np.std(precision_list), np.mean(recall_list), np.std(recall_list),
-           np.mean(accuracy_list), np.std(accuracy_list), np.mean(f1_list), np.std(f1_list)]
+    # print "precision: ", np.mean(precision_list), "std: ", np.std(precision_list)
+    # print "recall: ", np.mean(recall_list), "std: ", np.std(recall_list)
+    # print "accuracy: ", np.mean(accuracy_list), "std: ", np.std(accuracy_list)
+    # print "f1: ", np.mean(f1_list), "std: ", np.std(f1_list)
+
+
+    res = [np.mean(precision_list), np.std(precision_list),
+           np.mean(recall_list), np.std(recall_list),
+           np.mean(accuracy_list), np.std(accuracy_list),
+           np.mean(f1_list), np.std(f1_list),
+           np.mean(hamming_loss_list), np.std(hamming_loss_list),
+           np.mean(auc_macro_list), np.std(auc_macro_list),
+           np.mean(auc_weighted_list), np.std(auc_weighted_list)]
+
     return res
 
 
 def test_multi_label_para(model_name):
     feature_file_list = ['TFIDFV0', 'TFIDFV1', 'WORD2VECV0', 'WORD2VECV1', 'WORD2VECV2', 'WORD2VECV3', 'WORD2VECV4']
+    # feature_file_list = ['TFIDFV1']
     data_file_list = ['10', '10CAT', '50', '50CAT']
+    # data_file_list = ['10']
     test_res_list = []
     train_res_list = []
-    column_list = []
+    fake_res_list = []
+    index_list = []
     for i in feature_file_list:
         for j in data_file_list:
             data_file = i + '_' + j
@@ -249,25 +283,22 @@ def test_multi_label_para(model_name):
             test_label = loaded_data[5]
             feature_size = loaded_data[6]
 
+
             file_path = './data/cache'
             weights_name = 'weight_' + model_name + '_' + data_file + '.h5'
 
             model_func = getattr(nn_baseline_models, model_name)
-            model = model_func(feature_size)
+            model = model_func(feature_size, test_label.shape[1])
 
             model.load_weights(join(file_path, weights_name))
             print('Loaded model from disk')
             # convert sparse test data to dense
             test_data_dense = np.zeros((len(test_data), feature_size))
-            for i in range(len(test_data)):
-                for j in test_data[i]:
-                    test_data_dense[i, j[0]] = j[1]
-
+            for ii in range(len(test_data)):
+                for jj in test_data[ii]:
+                    test_data_dense[ii, jj[0]] = jj[1]
 
             test_pred = model.predict(test_data_dense, batch_size=256, verbose=0)
-            test_pred[test_pred >= 0.5] = 1
-            test_pred[test_pred < 0.5] = 0
-
             test_res = calc_performance(test_label, test_pred)
             test_res_list.append(test_res)
 
@@ -275,31 +306,43 @@ def test_multi_label_para(model_name):
 
             # get train metrics
             train_data_dense = np.zeros((len(train_data), feature_size))
-            for i in range(len(train_data)):
-                for j in train_data[i]:
-                    train_data_dense[i, j[0]] = j[1]
-
+            for ii in range(len(train_data)):
+                for jj in train_data[ii]:
+                    train_data_dense[ii, jj[0]] = jj[1]
 
             train_pred = model.predict(train_data_dense, batch_size=256, verbose=0)
-            train_pred[train_pred >= 0.5] = 1
-            train_pred[train_pred < 0.5] = 0
-
             train_res = calc_performance(train_label, train_pred)
             train_res_list.append(train_res)
-            column_list.append(i + '_' + j)
+
+            fake_label = np.zeros(test_label.shape)
+            fake_res = calc_performance(test_label, fake_label)
+            fake_res_list.append(fake_res)
+
+            index_list.append(data_file)
+            print "data_file name: ", data_file
 
 
-
-    df = pd.DataFrame(test_res_list, column = column_list)
+    column_list = ['precision', 'precision_std',
+               'recall', 'recall_std',
+               'accuracy', 'accuracy_std',
+               'f1', 'f1_std',
+               'hamming', 'hamming_std',
+               'auc_macro', 'auc_macro_std',
+               'auc_weighted', 'auc_weighted_std'
+               ]
+    df = pd.DataFrame(np.array(test_res_list), index = index_list, columns=column_list)
     df.to_csv('./data/' + model_name + '_test_res.csv')
-    df = pd.DataFrame(train_res_list, column = column_list)
+    df = pd.DataFrame(np.array(train_res_list), index = index_list, columns=column_list)
     df.to_csv('./data/' + model_name + '_train_res.csv')
+    df = pd.DataFrame(np.array(fake_res_list), index=index_list, columns=column_list)
+    df.to_csv('./data/' + model_name + '_fake_res.csv')
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--gpu', dest='gpu', help='gpu_number', default=0, type=int)
+    parser.add_argument('--gpu', dest='gpu', help='gpu_number', default=2, type=int)
+    parser.add_argument('--model', dest='model', help='model_number', default=1, type=int)
     args = parser.parse_args()
-    model_name = 'nn_model_' + str(args.gpu)
+    model_name = 'nn_model_' + str(args.model)
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
     test_multi_label_para(model_name)
