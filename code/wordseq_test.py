@@ -19,7 +19,7 @@ def parse_args():
     parser.add_argument('--patience', dest ='patience', help='patient for early stopper', default=5, type=int)
     parser.add_argument('--prob', dest ='prob', help='prob for activate the label', default=0.5, type=float)
     parser.add_argument('--argmax', dest='argmax', help='argmax trigger', default=False)
-    parser.add_argument('--eval_topN', dest='eval_topN', help='evaluate only the top N labels (ordered by f1 score)', default=-1)
+    parser.add_argument('--eval_topN', dest='eval_topN', help='evaluate only the top N labels (ordered by f1 score)', default=-1, type=int)
     if len(sys.argv) == 1:
         parser.print_help()
         print ('Run Default Settings ....... ')
@@ -80,17 +80,17 @@ def evaluate(test_label, test_pred, gettopX=-1):
            'f1_mean': np.mean(f1_list),
            'f1_std': np.std(f1_list)}
     if np.isnan(np.sum(precision_list)):
-        out['prec_mean2'] = np.nanmean(precision_list)
-        out['prec_std2'] = np.nanstd(precision_list)
+        out['prec_mean2'] = np.mean(np.nan_to_num(precision_list))
+        out['prec_std2'] = np.std(np.nan_to_num(precision_list))
     if np.isnan(np.sum(recall_list)):
-        out['recall_mean2'] = np.nanmean(recall_list)
-        out['recall_std2'] = np.nanstd(recall_list)
+        out['recall_mean2'] = np.mean(np.nan_to_num(recall_list))
+        out['recall_std2'] = np.std(np.nan_to_num(recall_list))
     if np.isnan(np.sum(f1_list)):
-        out['f1_mean2'] = np.nanmean(f1_list)
-        out['f1_std2'] = np.nanstd(f1_list)
+        out['f1_mean2'] = np.mean(np.nan_to_num(f1_list))
+        out['f1_std2'] = np.std(np.nan_to_num(f1_list))
 
     if gettopX > 0:
-        idx = np.argsort(f1_list)[-gettopX:]
+        idx = np.argsort(np.nan_to_num(f1_list))[-gettopX:]
         out['prec_meantop'] = np.mean(precision_list[idx])
         out['prec_stdtop'] = np.std(precision_list[idx])
         out['recall_meantop'] = np.mean(recall_list[idx])
@@ -99,6 +99,17 @@ def evaluate(test_label, test_pred, gettopX=-1):
         out['acc_stdtop'] = np.std(accuracy_list[idx])
         out['f1_meantop'] = np.mean(f1_list[idx])
         out['f1_stdtop'] = np.std(f1_list[idx])
+        if np.isnan(np.sum(precision_list[idx])):
+            out['prec_meantop2'] = np.mean(np.nan_to_num(precision_list[idx]))
+            out['prec_stdtop2'] = np.std(np.nan_to_num(precision_list[idx]))
+        if np.isnan(np.sum(recall_list[idx])):
+            out['recall_meantop2'] = np.mean(np.nan_to_num(recall_list[idx]))
+            out['recall_stdtop2'] = np.std(np.nan_to_num(recall_list[idx]))
+        if np.isnan(np.sum(f1_list[idx])):
+            out['f1_meantop2'] = np.mean(np.nan_to_num(f1_list[idx]))
+            out['f1_stdtop2'] = np.std(np.nan_to_num(f1_list[idx]))
+
+
     return out
 
 
@@ -156,42 +167,51 @@ def test(args):
         train_pred = model.predict(train_sequence, batch_size=batch_size, verbose=0)
         train_pred[train_pred >= args.prob] = 1
         train_pred[train_pred < args.prob] = 0
-
     trainEval = evaluate(train_label, train_pred, gettopX=args.eval_topN)
     testEval = evaluate(test_label, test_pred, gettopX=args.eval_topN)
 
+    print model_name + args.pre_train_append
     print "train: "
-    print "precision: {prec_mean} std: {prec_std}".format(**trainEval)
-    print "recall: {recall_mean} std: {recall_std}".format(**trainEval)
-    print "accuracy: {acc_mean} std: {acc_std}".format(**trainEval)
-    print "f1: {f1_mean} std: {f1_std}".format(**trainEval)
-    for i in ['prec', 'recall', 'f1']:
-        if "{0}_mean2".format(i) in trainEval:
-            print "{0}2: {1} std: {2}".format(i,
+    for i in ['prec', 'recall', 'acc', 'f1']:
+        print "{0}: {1} std: {2}".format(i,
+                                         trainEval["{0}_mean".format(i)],
+                                         trainEval["{0}_std".format(i)])
+        if "{0}_mean2".format(i) not in trainEval: continue
+        print "{0}_zeronan: {1} std: {2}".format(i,
                                              trainEval["{0}_mean2".format(i)],
                                              trainEval["{0}_std2".format(i)])
+    
     print "test:"
-    print "precision: {prec_mean} std: {prec_std}".format(**testEval)
-    print "recall: {recall_mean} std: {recall_std}".format(**testEval)
-    print "accuracy: {acc_mean} std: {acc_std}".format(**testEval)
-    print "f1: {f1_mean} std: {f1_std}".format(**testEval)
-    for i in ['prec', 'recall', 'f1']:
-        if "{0}_mean2".format(i) in testEval:
-            print "{0}: {1} std: {2}".format(i,
+    for i in ['prec', 'recall', 'acc', 'f1']:
+        print "{0}: {1} std: {2}".format(i,
+                                         testEval["{0}_mean".format(i)],
+                                         testEval["{0}_std".format(i)])
+        if "{0}_mean2".format(i) not in testEval: continue
+        print "{0}_zeronan: {1} std: {2}".format(i,
                                              testEval["{0}_mean2".format(i)],
                                              testEval["{0}_std2".format(i)])
 
     if args.eval_topN > 0:
-        print "train top{0}:".format(args.eval_topN)
+        print "\n" + model_name + args.pre_train_append + " top{0}".format(args.eval_topN)
+        print "train"
         for i in ['prec', 'recall', 'acc', 'f1']:
             print "{0}: {1} std: {2}".format(i,
                                              trainEval["{0}_meantop".format(i)],
                                              trainEval["{0}_stdtop".format(i)])
-        print "test top{0}:".format(args.eval_topN)
+            if "{0}_meantop2".format(i) not in trainEval: continue
+            print "{0}_zeronan: {1} std: {2}".format(i,
+                                             trainEval["{0}_meantop2".format(i)],
+                                             trainEval["{0}_stdtop2".format(i)])
+
+        print "test"
         for i in ['prec', 'recall', 'acc', 'f1']:
             print "{0}: {1} std: {2}".format(i,
                                              testEval["{0}_meantop".format(i)],
                                              testEval["{0}_stdtop".format(i)])
+            if "{0}_meantop2".format(i) not in testEval: continue
+            print "{0}_zeronan: {1} std: {2}".format(i,
+                                             testEval["{0}_meantop2".format(i)],
+                                             testEval["{0}_stdtop2".format(i)])
 
 if __name__ == '__main__':
     args = parse_args()

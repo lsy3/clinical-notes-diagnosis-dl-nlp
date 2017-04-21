@@ -168,6 +168,24 @@ def rnn_model_1(input_shape, output_shape, embedding_layer):
     model.summary()
     return model
 	
+def rnn_model_2(input_shape, output_shape, embedding_layer):
+    print('Build model...')
+    model = Sequential()
+    model.add(embedding_layer)
+    model.add(SimpleRNN(256, return_sequences=True))
+    model.add(Dropout(0.5))
+    model.add(BatchNormalization())
+    model.add(SimpleRNN(64))
+    model.add(Dropout(0.5))
+    model.add(BatchNormalization())
+    model.add(Dense(output_shape, activation='sigmoid'))
+
+    model.compile(loss='binary_crossentropy',
+                  optimizer='rmsprop',
+                  metrics=['acc', 'mse'])
+
+    return model
+
 
 def lstm_model_glove_1(input_shape, output_shape, embedding_layer):
     print('Build model...')
@@ -346,11 +364,10 @@ def conv1d_6(input_shape, output_shape, embedding_layer):
 
     return model
 
-def conv2d_1(input_shape, output_shape, embedding_layer):
+def conv2d_1(input_shape, output_shape):
 
     print('Build model...')
     model = Sequential()
-    model.add(embedding_layer)
     model.add(ZeroPadding2D((1, 1), input_shape=input_shape))
     model.add(Convolution2D(64, 3, 3, activation='relu'))
     model.add(ZeroPadding2D((1, 1)))
