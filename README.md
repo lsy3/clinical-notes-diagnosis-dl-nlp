@@ -1,31 +1,43 @@
-# cse6250-final-project
+# CSE6250 Final Project: Learning to Diagnose using Clinical Notes
 
-Proposal Report: [overleaf link](https://www.overleaf.com/8371794wnkynjkydwsn#/31606257/)
-Final Report (draft): [overleaf link](https://www.overleaf.com/8371794wnkynjkydwsn#/31606347/)
+Members:
+* Jinmiao Huang
+* Cesar Osorio
+* Luke Wicent Sy
 
-### Environment Setup
-1. conda env create -f environment.yml
-1. jupyter toree install --user --spark_home=<complete path>/spark-2.1.0-bin-hadoop2.7 --interpreters=PySpark
-    1. If you experience error in running the PySpark kernel. Make sure you put "complete path", not relative path.
-    1. If toree is not yet installed (should be included in environment.yml), run the ff. command:
-        1. pip install https://dist.apache.org/repos/dist/dev/incubator/toree/0.2.0/snapshots/dev1/toree-pip/toree-0.2.0.dev1.tar.gz
-        1. [github link](https://github.com/apache/incubator-toree)
-1. extract the ff. data to code/data (Luke's google drive)[https://drive.google.com/open?id=0B7IQxoKP3KPGWmFiUGlNTTBuWXM]:
-    1. DIAGNOSES_ICD.csv (get from piazza)
-    1. NOTEEVENTS-2.csv - a cleaned and sample version
-    1. DATA_TFIDFV0_HADM_TOP10.tar.gz (40k features, train-val-test, based on Luke's implementation)
-    1. DATA_TFIDFV1_HADM_TOP10.tar.gz (20k+ features, train-val-test, based on Cesar's implementation)
-    1. DATA_WORD2VEC_HADM_TOP10.tar.gz (100 features, train-val-test, based on Cesar's implementation)
-    1. DATA_HDM.csv.tar.gz (contains filtered rows and its corresponding labels and text)
-    1. DATA_HDM_CLEANED.csv.tar.gz (contains filtered rows and its corresponding labels and text (stopwords removed))
-    1. DATA_WORDSEQ_ALL.tar.gz (WORDSEQ V0 and V1 for top10-50-code-cat)
-    1. EMBMATRIX_ALL.tar.gz (Embedding Matrix for WORDSEQ V0 and V1, top10-50-code-cat)
-1. jupyter notebook
-    1. Console command to run the notebook. Don't forget to set the kernel to "Toree Pyspark".
+To be deleted soon
+1. Final Report (draft): [overleaf link](https://www.overleaf.com/8371794wnkynjkydwsn#/31606347/)
 1. Cesar's google drive with word2vec and doc2vec models
     1. (https://drive.google.com/open?id=0B5wTZcZsz2x7eVhaNkJoNkNWaWs)
 
-### Jupyter (on Docker VM)
+### Environment Setup (local)
+1. conda env create -f environment.yml
+1. Install spark or download spark binary from [here](https://spark.apache.org/downloads.html)
+1. pip install https://dist.apache.org/repos/dist/dev/incubator/toree/0.2.0/snapshots/dev1/toree-pip/toree-0.2.0.dev1.tar.gz
+    * the above command should install toree. if it fails, refer to [github link](https://github.com/apache/incubator-toree).
+    * note that toree was not included in environment.yml because including it there didn't work for me before. 
+1. jupyter toree install --user --spark_home=<complete path>/spark-2.1.0-bin-hadoop2.7 --interpreters=PySpark
+1. Extract the ff. files to the directory "code/data":
+    * DIAGNOSES_ICD.csv (from bd4h piazza)
+    * NOTEEVENTS-2.csv (cleaned version of NOTEEVENTS.csv; can be downloaded [here](https://drive.google.com/open?id=0B7IQxoKP3KPGWmFiUGlNTTBuWXM)
+1. To run data preprocessing, data statistics, and ipynb related stuff, start the jupyter notebook. Don't forget to set the kernel to "Toree Pyspark".
+    * jupyter notebook
+1. To run the deep learning experiments, follow the corresponding guide below.
+
+### Environment Setup (azure)
+1. Setup Docker w/ GPU following [this guide](https://github.com/NVIDIA/nvidia-docker/wiki/Deploy-on-Azure)
+1. Using Azure's portal, select the vm's firewall (in my case, it showed "azure01-firewall" in "all resources"), then "allow" port 22 (ssh) and 8888 (jupyter) for both inbound and outbound.
+1. You can ssh the VM through one of the ff:
+    * docker-machine ssh azure01
+    * ssh docker-user@public_ip_addr
+1. Spark can be installed by following the instructions in "Environment Setup (local), but note that this will not be as powerful as HDInsights. I recommend taking advantage of the VM's large memory by setting the spark memory to a higher value (<spark folder>/conf/spark-defaults.conf)
+1. If you have a jupyter notebook running in this VM, you can access via http://public_ip_addr:8888/
+1. To enable the GPUs for deep learning, follow the instructions in the tensorflow website [link](https://www.tensorflow.org/install/install_linux)
+    * you can check the GPUs' status by "nvidia-smi"
+
+
+###Jupyter (on Docker VM)
+To be deleted soon
 1. Go to http://52.179.1.29:8888/
 1. If asked for a password, enter 'jupyter'.
 1. Logging in via SSH (see Docker w/ GPU).
@@ -33,7 +45,8 @@ Final Report (draft): [overleaf link](https://www.overleaf.com/8371794wnkynjkydw
 1. Uploading a file:
     * scp -i path-to-git-root/id_rsa file-to-upload docker-user@52.179.1.29:~
 
-### Docker w/ GPU (for deep learning) [azure setup guide](https://github.com/NVIDIA/nvidia-docker/wiki/Deploy-on-Azure)
+### Docker w/ GPU (for deep learning) [azure setup guide]()
+To be deleted soon
 1. make sure you have id_rsa (update your git repo using 'git pull')
 1. ssh -i path-to-git-root/id_rsa docker-user@52.179.1.29
 1. source activate cse6250
