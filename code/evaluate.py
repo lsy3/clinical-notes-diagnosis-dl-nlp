@@ -193,17 +193,12 @@ def evaluate_3(y_true, y_pred, prob = 0.5):
         auc_macro_list[i] = sk_auc_macro
         auc_weighted_list[i] = sk_auc_weighted
 
-    precision_list.sort()
-    recall_list.sort()
-    f1_list.sort()
-    precision_list_top5 = precision_list[-5:]
-    recall_list_top5 = recall_list[-5:]
-    f1_list_top5 = f1_list[-5:]
-    precision_list_top10 = precision_list[-10:]
-    recall_list_top10 = recall_list[-10:]
-    f1_list_top10 = f1_list[-10:]
-
-
+    idx = np.argsort(np.nan_to_num(f1_list))[-gettopX:]
+    precision_list_top5 = precision_list[idx][-5:]
+    precision_list_top10 = precision_list[idx][-10:]
+    recall_list_top5 = recall_list[idx][-5:]
+    recall_list_top10 = recall_list[idx][-10:]
+    
 
     res = [np.mean(precision_list), np.std(precision_list),
            np.mean(recall_list), np.std(recall_list),
@@ -257,15 +252,12 @@ def evaluate_4(y_true, y_pred):
             auc_macro_list[i] = sk_auc_macro
             auc_weighted_list[i] = sk_auc_weighted
 
-        precision_list.sort()
-        recall_list.sort()
-        f1_list.sort()
-        precision_list_top5 = precision_list[-5:]
-        recall_list_top5 = recall_list[-5:]
-        f1_list_top5 = f1_list[-5:]
-        precision_list_top10 = precision_list[-10:]
-        recall_list_top10 = recall_list[-10:]
-        f1_list_top10 = f1_list[-10:]
+        
+        idx = np.argsort(np.nan_to_num(f1_list))[-gettopX:]
+        precision_list_top5 = precision_list[idx][-5:]
+        precision_list_top10 = precision_list[idx][-10:]
+        recall_list_top5 = recall_list[idx][-5:]
+        recall_list_top10 = recall_list[idx][-10:]
 
         res_list[ii-1, :] = [np.mean(precision_list),
                np.mean(recall_list),
