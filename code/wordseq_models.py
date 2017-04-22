@@ -1,7 +1,7 @@
 from keras.models import *
 from keras.layers import *
 
-def lstm_model_1(input_shape, output_shape, embedding_layer):
+def lstm_1(input_shape, output_shape, embedding_layer):
     print('Build model...')
     model = Sequential()
     model.add(embedding_layer)
@@ -18,7 +18,7 @@ def lstm_model_1(input_shape, output_shape, embedding_layer):
     return model
 
 
-def lstm_model_2(input_shape, output_shape, embedding_layer):
+def lstm_2(input_shape, output_shape, embedding_layer):
     print('Build model...')
     model = Sequential()
     model.add(embedding_layer)
@@ -32,7 +32,7 @@ def lstm_model_2(input_shape, output_shape, embedding_layer):
     return model
 
 
-def lstm_model_3(input_shape, output_shape, embedding_layer):
+def lstm_3(input_shape, output_shape, embedding_layer):
     print('Build model...')
     model = Sequential()
     model.add(embedding_layer)
@@ -46,7 +46,7 @@ def lstm_model_3(input_shape, output_shape, embedding_layer):
     return model
 
 	
-def lstm_model_4(input_shape, output_shape, embedding_layer):
+def lstm_4(input_shape, output_shape, embedding_layer):
     print('Build model...')
     model = Sequential()
     model.add(embedding_layer)
@@ -63,7 +63,7 @@ def lstm_model_4(input_shape, output_shape, embedding_layer):
     return model
 	
 
-def lstm_model_5(input_shape, output_shape, embedding_layer):
+def lstm_5(input_shape, output_shape, embedding_layer):
 	print('Build model...')
 	model = Sequential()
 	model.add(embedding_layer)
@@ -77,7 +77,7 @@ def lstm_model_5(input_shape, output_shape, embedding_layer):
 	return model
 	
 	
-def lstm_model_6(input_shape, output_shape, embedding_layer):
+def lstm_6(input_shape, output_shape, embedding_layer):
 	print('Build model...')
 	model = Sequential()
 	model.add(embedding_layer)
@@ -91,7 +91,7 @@ def lstm_model_6(input_shape, output_shape, embedding_layer):
 	return model
 	
 
-def lstm_model_7(input_shape, output_shape, embedding_layer):
+def lstm_7(input_shape, output_shape, embedding_layer):
 	model = Sequential()
 	model.add(embedding_layer)
 	model.add(Conv1D(256, 5, padding='valid', activation='relu', strides=1))
@@ -106,7 +106,7 @@ def lstm_model_7(input_shape, output_shape, embedding_layer):
 	return model
 
 
-def lstm_model_8(input_shape, output_shape, embedding_layer):
+def lstm_8(input_shape, output_shape, embedding_layer):
     model = Sequential()
     model.add(embedding_layer)
     model.add(Bidirectional(LSTM(256)))
@@ -121,7 +121,7 @@ def lstm_model_8(input_shape, output_shape, embedding_layer):
     return model
 
 
-def lstm_model_9(input_shape, output_shape, embedding_layer):
+def lstm_9(input_shape, output_shape, embedding_layer):
     model = Sequential()
     model.add(embedding_layer)
     model.add(Bidirectional(LSTM(128, return_sequences=True)))
@@ -137,7 +137,7 @@ def lstm_model_9(input_shape, output_shape, embedding_layer):
     return model
 	
 	
-def lstm_model_10(input_shape, output_shape, embedding_layer):
+def lstm_10(input_shape, output_shape, embedding_layer):
     print('Build model...')
     model = Sequential()
     model.add(embedding_layer)
@@ -155,7 +155,7 @@ def lstm_model_10(input_shape, output_shape, embedding_layer):
 
 	
 	
-def rnn_model_1(input_shape, output_shape, embedding_layer):
+def rnn_1(input_shape, output_shape, embedding_layer):
     print('Build model...')
     model = Sequential()
     model.add(embedding_layer)
