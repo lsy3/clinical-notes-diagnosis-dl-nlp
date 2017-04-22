@@ -267,7 +267,7 @@ def test_multi_label_para(model_name):
     for i in feature_file_list:
         for j in data_file_list:
             data_file = i + '_' + j
-            full_path = './data/BASELINE/' + data_file + '.p'
+            full_path = './data/' + data_file + '.p'
 
             f = open(full_path, 'rb')
             loaded_data = []
