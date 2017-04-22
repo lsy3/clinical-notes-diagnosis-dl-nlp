@@ -7,6 +7,7 @@ import nn_baseline_models
 from sklearn.metrics import *
 import os
 import pandas as pd
+from evaluate import *
 
 
 def parse_args():
@@ -186,75 +187,6 @@ def test_multi_model():
     print "f1: ", np.mean(f1_list), "std: ", np.std(f1_list)
 
 
-def calc_performance(y_true, y_pred, prob = 0.5):
-    pred_label = np.copy(y_pred)
-    pred_label[pred_label >= prob] = 1
-    pred_label[pred_label < prob] = 0
-
-    precision_list = np.zeros((y_true.shape[1]))
-    recall_list = np.zeros((y_true.shape[1]))
-    f1_list = np.zeros((y_true.shape[1]))
-    accuracy_list = np.zeros((y_true.shape[1]))
-    auc_list = np.zeros((y_true.shape[1]))
-    hamming_loss_list = np.zeros((y_true.shape[1]))
-    auc_macro_list =np.zeros((y_true.shape[1]))
-    auc_weighted_list = np.zeros((y_true.shape[1]))
-
-
-    for i in range(y_true.shape[1]):
-        # cm = confusion_matrix(y_true[:, i], pred_label[:, i])
-        # tn = cm[0, 0]
-        # fp = cm[0, 1]
-        # fn = cm[1, 0]
-        # tp = cm[1, 1]
-        # # tn | fp
-        # # ---|---
-        # # fn | tp
-        # precision = tp / float(tp + fp)
-        # precision_list[i] = precision
-        # recall = tp / float(tp + fn)
-        # recall_list[i] = recall
-        # f1 = 2 * (precision * recall / float(precision + recall))
-        # f1_list[i] = f1
-        # accuracy = (tp + tn) / float(tp + tn + fp + fn)
-        # accuracy_list[i] = accuracy
-        sk_precision = precision_score(y_true[:, i], pred_label[:, i])
-        sk_recall = recall_score(y_true[:, i], pred_label[:, i])
-        sk_f1 = f1_score(y_true[:, i], pred_label[:, i])
-        sk_accuracy = accuracy_score(y_true[:, i], pred_label[:, i])
-        # fpr, tpr, thresholds = roc_curve(y_true[:, i], pred_label[:, i], pos_label=2)
-        # print 'fpr, :', fpr
-        # print 'tpr, :', tpr
-        # sk_auc = auc(fpr, tpr)
-
-        sk_hamming_loss = hamming_loss(y_true[:, i], pred_label[:, i])
-        sk_auc_macro = roc_auc_score(y_true[:, i], y_pred[:, i])
-        sk_auc_weighted = roc_auc_score(y_true[:, i], y_pred[:, i], average='weighted')
-        precision_list[i] = sk_precision
-        recall_list[i] = sk_recall
-        f1_list[i] = sk_f1
-        accuracy_list[i] = sk_accuracy
-        hamming_loss_list[i] = sk_hamming_loss
-        auc_macro_list[i] = sk_auc_macro
-        auc_weighted_list[i] = sk_auc_weighted
-
-    # print "precision: ", np.mean(precision_list), "std: ", np.std(precision_list)
-    # print "recall: ", np.mean(recall_list), "std: ", np.std(recall_list)
-    # print "accuracy: ", np.mean(accuracy_list), "std: ", np.std(accuracy_list)
-    # print "f1: ", np.mean(f1_list), "std: ", np.std(f1_list)
-
-
-    res = [np.mean(precision_list), np.std(precision_list),
-           np.mean(recall_list), np.std(recall_list),
-           np.mean(accuracy_list), np.std(accuracy_list),
-           np.mean(f1_list), np.std(f1_list),
-           np.mean(hamming_loss_list), np.std(hamming_loss_list),
-           np.mean(auc_macro_list), np.std(auc_macro_list),
-           np.mean(auc_weighted_list), np.std(auc_weighted_list)]
-
-    return res
-
-
 def test_multi_label_para(model_name):
     feature_file_list = ['TFIDFV0', 'TFIDFV1', 'WORD2VECV0', 'WORD2VECV1', 'WORD2VECV2', 'WORD2VECV3', 'WORD2VECV4']
     # feature_file_list = ['TFIDFV1']
@@ -299,7 +231,7 @@ def test_multi_label_para(model_name):
                     test_data_dense[ii, jj[0]] = jj[1]
 
             test_pred = model.predict(test_data_dense, batch_size=256, verbose=0)
-            test_res = calc_performance(test_label, test_pred)
+            test_res = evaluate_2(test_label, test_pred)
             test_res_list.append(test_res)
 
             del test_data_dense
@@ -311,11 +243,11 @@ def test_multi_label_para(model_name):
                     train_data_dense[ii, jj[0]] = jj[1]
 
             train_pred = model.predict(train_data_dense, batch_size=256, verbose=0)
-            train_res = calc_performance(train_label, train_pred)
+            train_res = evaluate_2(train_label, train_pred)
             train_res_list.append(train_res)
 
             fake_label = np.zeros(test_label.shape)
-            fake_res = calc_performance(test_label, fake_label)
+            fake_res = evaluate_2(test_label, fake_label)
             fake_res_list.append(fake_res)
 
             index_list.append(data_file)
