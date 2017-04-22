@@ -188,10 +188,9 @@ def test_multi_model():
 
 
 def test_multi_label_para(model_name):
-    feature_file_list = ['TFIDFV0', 'TFIDFV1', 'WORD2VECV0', 'WORD2VECV1', 'WORD2VECV2', 'WORD2VECV3', 'WORD2VECV4']
-    # feature_file_list = ['TFIDFV1']
+    # feature_file_list = ['TFIDFV0', 'TFIDFV1', 'WORD2VECV0', 'WORD2VECV1', 'WORD2VECV2', 'WORD2VECV3', 'WORD2VECV4']
+    feature_file_list = ['DOC2VECV0', 'DOC2VECV1', 'DOC2VECV2']
     data_file_list = ['10', '10CAT', '50', '50CAT']
-    # data_file_list = ['10']
     test_res_list = []
     train_res_list = []
     fake_res_list = []

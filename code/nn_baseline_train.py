@@ -158,9 +158,7 @@ def train_multi_label_auto():
 
 
 def train_multi_label_para(model_name):
-    # feature_file_list = ['TFIDFV0', 'TFIDFV1', 'WORD2VECV0', 'WORD2VECV1', 'WORD2VECV2', 'WORD2VECV3', 'WORD2VECV4']
-    feature_file_list = ['TFIDFV0', 'TFIDFV1']
-    # data_file_list = ['10', '10CAT', '50', '50CAT']
+    feature_file_list = ['TFIDFV0', 'TFIDFV1', 'WORD2VECV0', 'WORD2VECV1', 'WORD2VECV2', 'WORD2VECV3', 'WORD2VECV4', 'DOC2VECV0', 'DOC2VECV1', 'DOC2VECV2']
     data_file_list = ['10', '10CAT', '50', '50CAT']
     for i in feature_file_list:
         for j in data_file_list:
