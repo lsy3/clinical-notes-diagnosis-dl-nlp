@@ -31,28 +31,6 @@ def parse_args():
     args = parser.parse_args()
     return args
 
-
-<<<<<<< HEAD
-def batch_generator(X, y, batch_size, shuffle, feature_size):
-    number_of_batches = len(X)/batch_size
-    counter = 0
-    sample_index = np.arange(len(X))
-    if shuffle:
-        np.random.shuffle(sample_index)
-    while True:
-        batch_index = sample_index[batch_size*counter:batch_size*(counter+1)]
-        y_batch = y[batch_index]
-        X_batch = np.zeros((batch_size, feature_size))
-        for i in range(batch_size):
-            for j in X[i]:
-                X_batch[i, j[0]] = j[1]
-        counter += 1
-        yield X_batch, y_batch
-        if (counter == number_of_batches):
-            if shuffle:
-                np.random.shuffle(sample_index)
-            counter = 0
-
 def test(args):
     
     model_name = args.model_name
@@ -112,7 +90,7 @@ def test(args):
     testEval = evaluate_1(test_label, test_pred, gettopX=args.eval_topN, getfirstX=args.eval_firstN)
 
     for code, num in [('', 1), ('top', args.eval_topN), ('first', args.eval_firstN)]:
-        if num < 0: continue:
+        if num < 0: continue
 
         print "{0}{1} {2}{3}".format(model_name, args.pre_train_append,
                                      code, num if code != '' else '')
@@ -136,6 +114,7 @@ def test(args):
             print "{0}_zeronan: {1} std: {2}".format(i,
                                              testEval["{0}_mean{1}2".format(i,code)],
                                              testEval["{0}_std{1}2".format(i,code)])
+        print ""
 
 
 def test_auto(args):
