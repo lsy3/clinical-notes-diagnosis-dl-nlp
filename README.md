@@ -20,6 +20,7 @@ To be deleted soon
 1. Extract the ff. files to the directory "code/data":
     * DIAGNOSES_ICD.csv (from bd4h piazza)
     * NOTEEVENTS-2.csv (cleaned version of NOTEEVENTS.csv; can be downloaded [here](https://drive.google.com/open?id=0B7IQxoKP3KPGWmFiUGlNTTBuWXM)
+    * D_ICD_DIAGNOSES.csv (from bd4h piazza)
 1. To run data preprocessing, data statistics, and ipynb related stuff, start the jupyter notebook. Don't forget to set the kernel to "Toree Pyspark".
     * jupyter notebook
 1. To run the deep learning experiments, follow the corresponding guide below.
