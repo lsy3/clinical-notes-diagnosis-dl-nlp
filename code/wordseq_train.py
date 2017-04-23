@@ -62,6 +62,11 @@ def train(args):
         train_label = np.repeat(train_label, n, axis=1)
         val_label = np.repeat(val_label, n, axis=1)
         print 'labelmode: repeat {0}'.format(train_label.shape)
+    elif args.labelmode[:5] == 'range':
+        n = [int(i) for i in args.labelmode[5:].split(" ")]
+        train_label = train_label[:,n[0]:n[1]]
+        val_label = val_label[:,n[0]:n[1]]
+        print 'labelmode: repeat {0}'.format(train_label.shape)
 
     # f = open('./data/dictionary_v0.p', 'wb')
     # cPickle.dump(dictionary, f)
