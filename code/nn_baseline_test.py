@@ -192,8 +192,10 @@ def test_multi_model():
 
 def test_multi_label_para(model_name, args):
     # feature_file_list = ['TFIDFV0', 'TFIDFV1', 'WORD2VECV0', 'WORD2VECV1', 'WORD2VECV2', 'WORD2VECV3', 'WORD2VECV4']
-    feature_file_list = ['DOC2VECV0', 'DOC2VECV1', 'DOC2VECV2']
-    data_file_list = ['10', '10CAT', '50', '50CAT']
+    # feature_file_list = ['DOC2VECV0', 'DOC2VECV1', 'DOC2VECV2']
+    feature_file_list = ['TFIDFV1']
+    # data_file_list = ['10', '10CAT', '50', '50CAT']
+    data_file_list = ['10', '10CAT']
     test_res_list = []
     train_res_list = []
     fake_res_list = []
@@ -218,17 +220,17 @@ def test_multi_label_para(model_name, args):
             feature_size = loaded_data[6]
 
             if args.labelmode[:4] == 'tile':
-                print 'labelmode: tile'
                 n = int(args.labelmode[4:].strip()
                 train_label = np.tile(train_label, n)
                 valid_label = np.tile(valid_label, n)
                 test_label = np.tile(test_label, n)
+                print 'labelmode: tile {0}'.format(train_label.shape)
             elif args.labelmode[:6] == 'repeat':
-                print 'labelmode: repeat'
                 n = int(args.labelmode[6:].strip()
                 train_label = np.repeat(train_label, n, axis=1)
                 valid_label = np.repeat(valid_label, n, axis=1)
                 test_label = np.repeat(test_label, n, axis=1)
+                print 'labelmode: repeat {0}'.format(train_label.shape)
 
             file_path = './data/cache'
             weights_name = 'weight_' + model_name + '_' + data_file + '.h5'

@@ -53,15 +53,15 @@ def train(args):
     val_label = loaded_data[5]
 
     if args.labelmode[:4] == 'tile':
-        print 'labelmode: tile'
-        n = int(args.labelmode[4:].strip()
+        n = int(args.labelmode[4:].strip())
         train_label = np.tile(train_label, n)
         val_label = np.tile(val_label, n)
+        print 'labelmode: tile {0}'.format(train_label.shape)
     elif args.labelmode[:6] == 'repeat':
-        print 'labelmode: repeat'
-        n = int(args.labelmode[6:].strip()
+        n = int(args.labelmode[6:].strip())
         train_label = np.repeat(train_label, n, axis=1)
         val_label = np.repeat(val_label, n, axis=1)
+        print 'labelmode: repeat {0}'.format(train_label.shape)
 
     # f = open('./data/dictionary_v0.p', 'wb')
     # cPickle.dump(dictionary, f)

@@ -53,15 +53,15 @@ def test(args):
     test_label = loaded_data[6]
 
     if args.labelmode[:4] == 'tile':
-        print 'labelmode: tile'
-        n = int(args.labelmode[4:].strip()
+        n = int(args.labelmode[4:].strip())
         train_label = np.tile(train_label, n)
         test_label = np.tile(test_label, n)
+        print 'labelmode: tile {0}'.format(train_label.shape)
     elif args.labelmode[:6] == 'repeat':
-        print 'labelmode: repeat'
-        n = int(args.labelmode[6:].strip()
+        n = int(args.labelmode[6:].strip())
         train_label = np.repeat(train_label, n, axis=1)
         test_label = np.repeat(test_label, n, axis=1)
+        print 'labelmode: repeat {0}'.format(train_label.shape)
 
     f = open(args.embmatrix)
     embedding_matrix = cPickle.load(f)

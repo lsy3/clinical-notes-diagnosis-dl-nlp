@@ -160,8 +160,10 @@ def train_multi_label_auto():
 
 
 def train_multi_label_para(model_name, args):
-    feature_file_list = ['TFIDFV0', 'TFIDFV1', 'WORD2VECV0', 'WORD2VECV1', 'WORD2VECV2', 'WORD2VECV3', 'WORD2VECV4', 'DOC2VECV0', 'DOC2VECV1', 'DOC2VECV2']
-    data_file_list = ['10', '10CAT', '50', '50CAT']
+    #feature_file_list = ['TFIDFV0', 'TFIDFV1', 'WORD2VECV0', 'WORD2VECV1', 'WORD2VECV2', 'WORD2VECV3', 'WORD2VECV4', 'DOC2VECV0', 'DOC2VECV1', 'DOC2VECV2']
+    feature_file_list = ['TFIDFV1']
+    #data_file_list = ['10', '10CAT', '50', '50CAT']
+    data_file_list = ['10CAT']
     for i in feature_file_list:
         for j in data_file_list:
             data_file = i + '_' + j
@@ -181,15 +183,15 @@ def train_multi_label_para(model_name, args):
             feature_size = loaded_data[6]
 
             if args.labelmode[:4] == 'tile':
-                print 'labelmode: tile'
-                n = int(args.labelmode[4:].strip()
+                n = int(args.labelmode[4:].strip())
                 train_label = np.tile(train_label, n)
                 valid_label = np.tile(valid_label, n)
+                print 'labelmode: tile {0}'.format(train_label.shape)
             elif args.labelmode[:6] == 'repeat':
-               print 'labelmode: repeat'
-               n = int(args.labelmode[6:].strip()
-               train_label = np.repeat(train_label, n, axis=1)
-               valid_label = np.repeat(valid_label, n, axis=1)
+                n = int(args.labelmode[6:].strip())
+                train_label = np.repeat(train_label, n, axis=1)
+                valid_label = np.repeat(valid_label, n, axis=1)
+                print 'labelmode: repeat {0}'.format(train_label.shape)
 
             train_data = sparse2dense(train_data, feature_size)
             valid_data = sparse2dense(valid_data, feature_size)
@@ -247,9 +249,10 @@ def train_multi_model():
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--gpu', dest='gpu', help='gpu_number', default=0, type=int)
-    args = parser.parse_args()
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument('--gpu', dest='gpu', help='gpu_number', default=0, type=int)
+    # args = parser.parse_args()
+    args = parse_args()
     n = args.gpu
     model_name = 'nn_model_' + str(args.gpu)
     if args.gpu == 2:
