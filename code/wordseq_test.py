@@ -23,6 +23,7 @@ def parse_args():
     parser.add_argument('--argmax', dest='argmax', help='argmax trigger', default=False)
     parser.add_argument('--eval_topN', dest='eval_topN', help='evaluate only the top N labels (ordered by f1 score)', default=-1, type=int)
     parser.add_argument('--eval_firstN', dest='eval_firstN', help='evaluate only the first N labels', default=-1, type=int)
+    parser.add_argument('--eval_everyN', dest='eval_everyN', help='evaluate every N labels', default=-1, type=int)
     parser.add_argument('--labelmode', dest ='labelmode', 
                         help='additional label processing. Option: tile<num>, repeat<num>, range<num>_<num>',
                         default='', type=str)
@@ -105,10 +106,18 @@ def test(args):
         train_pred[train_pred >= args.prob] = 1
         train_pred[train_pred < args.prob] = 0
 
-    trainEval = evaluate_1(train_label, train_pred, gettopX=args.eval_topN, getfirstX=args.eval_firstN)
-    testEval = evaluate_1(test_label, test_pred, gettopX=args.eval_topN, getfirstX=args.eval_firstN)
+    trainEval = evaluate_1(train_label, train_pred, gettopX=args.eval_topN,
+                           getfirstX=args.eval_firstN,
+                           geteveryX=args.eval_everyN)
+    testEval = evaluate_1(test_label, test_pred, gettopX=args.eval_topN,
+                          getfirstX=args.eval_firstN,
+                          geteveryX=args.eval_everyN)
 
-    for code, num in [('', 1), ('top', args.eval_topN), ('first', args.eval_firstN)]:
+    runs = [('', 1), ('top', args.eval_topN), ('first', args.eval_firstN)]
+    for i in xrange(0,test_label.shape[1]/args.eval_everyN):
+        runs.append(('every{0}'.format(i),args.eval_everyN))
+
+    for code, num in runs: 
         if num < 0: continue
 
         print "{0}{1} {2}{3}".format(model_name, args.pre_train_append,
