@@ -16,6 +16,9 @@ def parse_args():
     parser.add_argument('--model_name', dest='model_name', help='model loaded from dl_model.py', default='nn_model_2', type=str)
     parser.add_argument('--datafile', dest='data_file', help='data file name', default='tfidf_v0_top10', type=str)
     parser.add_argument('--gpu', dest='gpu', help='set gpu no to be used (default: 0)', default='0', type=str)
+    parser.add_argument('--labelmode', dest ='labelmode', 
+                        help='additional label processing. Option: tile<num>, repeat<num>',
+                        default='', type=str)
     if len(sys.argv) == 1:
         parser.print_help()
         print ('Run Default Settings ....... ')
@@ -187,7 +190,7 @@ def test_multi_model():
     print "f1: ", np.mean(f1_list), "std: ", np.std(f1_list)
 
 
-def test_multi_label_para(model_name):
+def test_multi_label_para(model_name, args):
     # feature_file_list = ['TFIDFV0', 'TFIDFV1', 'WORD2VECV0', 'WORD2VECV1', 'WORD2VECV2', 'WORD2VECV3', 'WORD2VECV4']
     feature_file_list = ['DOC2VECV0', 'DOC2VECV1', 'DOC2VECV2']
     data_file_list = ['10', '10CAT', '50', '50CAT']
@@ -214,6 +217,18 @@ def test_multi_label_para(model_name):
             test_label = loaded_data[5]
             feature_size = loaded_data[6]
 
+            if args.labelmode[:4] == 'tile':
+                print 'labelmode: tile'
+                n = int(args.labelmode[4:].strip()
+                train_label = np.tile(train_label, n)
+                valid_label = np.tile(valid_label, n)
+                test_label = np.tile(test_label, n)
+            elif args.labelmode[:6] == 'repeat':
+                print 'labelmode: repeat'
+                n = int(args.labelmode[6:].strip()
+                train_label = np.repeat(train_label, n, axis=1)
+                valid_label = np.repeat(valid_label, n, axis=1)
+                test_label = np.repeat(test_label, n, axis=1)
 
             file_path = './data/cache'
             weights_name = 'weight_' + model_name + '_' + data_file + '.h5'
@@ -276,4 +291,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     model_name = 'nn_model_' + str(args.model)
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
-    test_multi_label_para(model_name)
+    test_multi_label_para(model_name, args)

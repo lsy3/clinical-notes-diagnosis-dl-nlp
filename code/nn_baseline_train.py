@@ -18,7 +18,9 @@ def parse_args():
     parser.add_argument('--gpu', dest = 'gpu', help='set gpu no to be used (default: 0)', default='0',type=str)
     parser.add_argument('--plot_model', dest = 'plot_model', help='plot the said model', default=True)
     parser.add_argument('--patience', dest ='patience', help='patient for early stopper', default=10, type=int)
-
+    parser.add_argument('--labelmode', dest ='labelmode', 
+                        help='additional label processing. Option: tile<num>, repeat<num>',
+                        default='', type=str)
 
 
     if len(sys.argv) == 1:
@@ -157,7 +159,7 @@ def train_multi_label_auto():
                 train(model_name, weights_path, train_data, train_label, valid_data, valid_label, feature_size)
 
 
-def train_multi_label_para(model_name):
+def train_multi_label_para(model_name, args):
     feature_file_list = ['TFIDFV0', 'TFIDFV1', 'WORD2VECV0', 'WORD2VECV1', 'WORD2VECV2', 'WORD2VECV3', 'WORD2VECV4', 'DOC2VECV0', 'DOC2VECV1', 'DOC2VECV2']
     data_file_list = ['10', '10CAT', '50', '50CAT']
     for i in feature_file_list:
@@ -177,6 +179,17 @@ def train_multi_label_para(model_name):
             train_label = loaded_data[3]
             valid_label = loaded_data[4]
             feature_size = loaded_data[6]
+
+            if args.labelmode[:4] == 'tile':
+                print 'labelmode: tile'
+                n = int(args.labelmode[4:].strip()
+                train_label = np.tile(train_label, n)
+                valid_label = np.tile(valid_label, n)
+            elif args.labelmode[:6] == 'repeat':
+               print 'labelmode: repeat'
+               n = int(args.labelmode[6:].strip()
+               train_label = np.repeat(train_label, n, axis=1)
+               valid_label = np.repeat(valid_label, n, axis=1)
 
             train_data = sparse2dense(train_data, feature_size)
             valid_data = sparse2dense(valid_data, feature_size)
@@ -242,7 +255,7 @@ if __name__ == '__main__':
     if args.gpu == 2:
         args.gpu = 0
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
-    train_multi_label_para(model_name)
+    train_multi_label_para(model_name, args)
 
     # args = parse_args()
     # if args.gpu:
