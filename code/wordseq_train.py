@@ -22,6 +22,9 @@ def parse_args():
     parser.add_argument('--gpu', dest = 'gpu', help='set gpu no to be used (default: 0)', default='1',type=str)
     parser.add_argument('--plot_model', dest = 'plot_model', help='plot the said model', default=True)
     parser.add_argument('--patience', dest ='patience', help='patient for early stopper', default=5, type=int)
+    parser.add_argument('--labelmode', dest ='labelmode', 
+                        help='additional label processing. Option: tile<num>, repeat<num>, range<num>_<num>',
+                        default='', type=str)
 
     if len(sys.argv) == 1:
         parser.print_help()
@@ -48,6 +51,22 @@ def train(args):
     val_sequence = loaded_data[2]
     train_label = loaded_data[4]
     val_label = loaded_data[5]
+
+    if args.labelmode[:4] == 'tile':
+        n = int(args.labelmode[4:].strip())
+        train_label = np.tile(train_label, n)
+        val_label = np.tile(val_label, n)
+        print 'labelmode: tile {0}'.format(train_label.shape)
+    elif args.labelmode[:6] == 'repeat':
+        n = int(args.labelmode[6:].strip())
+        train_label = np.repeat(train_label, n, axis=1)
+        val_label = np.repeat(val_label, n, axis=1)
+        print 'labelmode: repeat {0}'.format(train_label.shape)
+    elif args.labelmode[:5] == 'range':
+        n = [int(i) for i in args.labelmode[5:].split("_")]
+        train_label = train_label[:,n[0]:n[1]]
+        val_label = val_label[:,n[0]:n[1]]
+        print 'labelmode: range{0}'.format(train_label.shape)
 
     # f = open('./data/dictionary_v0.p', 'wb')
     # cPickle.dump(dictionary, f)

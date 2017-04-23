@@ -168,7 +168,7 @@ def rnn_1(input_shape, output_shape, embedding_layer):
     model.summary()
     return model
 	
-def rnn_model_2(input_shape, output_shape, embedding_layer):
+def rnn_2(input_shape, output_shape, embedding_layer):
     print('Build model...')
     model = Sequential()
     model.add(embedding_layer)

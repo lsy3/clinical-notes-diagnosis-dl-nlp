@@ -1,6 +1,7 @@
 
 from pyspark import SparkContext, SparkConf
 from pyspark.sql.types import *
+import pyspark.sql.functions as F
 
 conf = SparkConf().setAppName("preprocess").setMaster("local")
 sc = SparkContext.getOrCreate(conf)
@@ -39,6 +40,9 @@ df_diag_m = spark.read.csv("./data/DIAGNOSES_ICD.csv",
                         "HADM_ID as hadm_id",
                         "SEQ_NUM as seq_num",
                         "ICD9_CODE as icd9_code")
+# added to filter out categories
+geticd9cat_udf = F.udf(lambda x: str(x)[:3], StringType())
+df_diag_m = df_diag_m.withColumn("icd9_cat", geticd9cat_udf("icd9_code"))
 df_diag_m.registerTempTable("diagnoses_icd_m")
 df_diag_m.cache()
 
@@ -66,15 +70,13 @@ SELECT DISTINCT subject_id FROM noteevents2
 df_subject_id_list.registerTempTable("subject_id_list")
 df_subject_id_list.cache()
 
-print df_ne.dtypes
-print df_diag_m.dtypes
-print df_diag_o.dtypes
-print df_hadm_id_list.dtypes
-print df_subject_id_list.dtypes
+df_icd9desc = spark.read.csv("./data/D_ICD_DIAGNOSES.csv",
+                       header=True, inferSchema=True)
+df_icd9desc.registerTempTable("diagnoses_icd_desc")
 
 df_diag_o2 = spark.sql("""
 SELECT row_id, subject_id, diagnoses_icd_o.hadm_id AS hadm_id,
-seq_num, icd9_code
+seq_num, icd9_code, icd9_cat
 FROM diagnoses_icd_o JOIN hadm_id_list
 ON diagnoses_icd_o.hadm_id = hadm_id_list.hadm_id
 """)
@@ -83,242 +85,173 @@ df_diag_o2.cache()
 
 df_diag_m2 = spark.sql("""
 SELECT row_id, subject_id, diagnoses_icd_m.hadm_id AS hadm_id,
-seq_num, icd9_code
+seq_num, icd9_code, icd9_cat
 FROM diagnoses_icd_m JOIN hadm_id_list
 ON diagnoses_icd_m.hadm_id = hadm_id_list.hadm_id
 """)
 df_diag_m2.registerTempTable("diagnoses_icd_m2")
 df_diag_m2.cache()
 
-spark.sql("""
-SELECT COUNT(*), COUNT(DISTINCT subject_id), COUNT(DISTINCT hadm_id)
-FROM noteevents
-""").show()
-spark.sql("""
-SELECT COUNT(*), COUNT(DISTINCT subject_id), COUNT(DISTINCT hadm_id)
-FROM noteevents2
-""").show()
+print df_ne.dtypes
+print df_diag_m.dtypes
+print df_diag_o.dtypes
+print df_hadm_id_list.dtypes
+print df_subject_id_list.dtypes
+print df_icd9desc.dtypes
+print df_diag_o2.dtypes
+print df_diag_m2.dtypes
 
-spark.sql("""
-SELECT COUNT(DISTINCT hadm_id) AS hadm_count
-FROM diagnoses_icd_m2
-WHERE icd9_code IN
-    (SELECT icd9_code
-    FROM diagnoses_icd_m2
-    GROUP BY icd9_code
-    ORDER BY COUNT(DISTINCT hadm_id) DESC
-    LIMIT 10)
-""").show()
-
-spark.sql("""
-SELECT COUNT(DISTINCT hadm_id) AS hadm_count
-FROM diagnoses_icd_m2
-WHERE icd9_code IN
-    (SELECT icd9_code
-    FROM diagnoses_icd_m2
-    GROUP BY icd9_code
-    ORDER BY COUNT(DISTINCT hadm_id) DESC
-    LIMIT 50)
-""").show()
-
-spark.sql("""
-SELECT COUNT(DISTINCT hadm_id) AS hadm_count
-FROM diagnoses_icd_m2
-WHERE icd9_code IN
-    (SELECT icd9_code
-    FROM diagnoses_icd_m2
-    GROUP BY icd9_code
-    ORDER BY COUNT(DISTINCT hadm_id) DESC
-    LIMIT 100)
-""").show()
-
-spark.sql("""
-SELECT DISTINCT(category)
-FROM noteevents
-""").show()
-
-spark.sql("""
-SELECT COUNT(*), COUNT(DISTINCT subject_id), 
-COUNT(DISTINCT hadm_id), COUNT(DISTINCT ICD9_CODE)
-FROM diagnoses_icd_m
-""").show()
-
-spark.sql("""
-SELECT COUNT(*), COUNT(DISTINCT subject_id), 
-COUNT(DISTINCT hadm_id), COUNT(DISTINCT LOWER(ICD9_CODE))
-FROM diagnoses_icd_m
-""").show()
-
-spark.sql("""
-SELECT COUNT(*), COUNT(DISTINCT subject_id), 
-COUNT(DISTINCT hadm_id), COUNT(DISTINCT ICD9_CODE)
-FROM diagnoses_icd_o
-""").show()
-
-spark.sql("""
-SELECT COUNT(*), COUNT(DISTINCT subject_id), 
-COUNT(DISTINCT hadm_id), COUNT(DISTINCT LOWER(ICD9_CODE))
-FROM diagnoses_icd_o
-""").show()
-
-# check code
-spark.sql("""
-SELECT *
-FROM diagnoses_icd_o
-WHERE seq_num <> 1
-""").show()
-
-spark.sql("""
-SELECT COUNT(DISTINCT subject_id), 
-COUNT(DISTINCT hadm_id), COUNT(DISTINCT icd9_code)
-FROM diagnoses_icd_o2
-""").show()
-
-spark.sql("""
-SELECT icd9_code, COUNT(DISTINCT subject_id) AS sid_count
-FROM diagnoses_icd_o2
-GROUP BY icd9_code
-ORDER BY sid_count DESC
-LIMIT 50
-""").show(n=50)
-
-spark.sql("""
-SELECT icd9_code, COUNT(DISTINCT hadm_id) AS hadm_count
-FROM diagnoses_icd_o2
-GROUP BY icd9_code
-ORDER BY hadm_count DESC
-LIMIT 50
-""").show(n=50)
-
-spark.sql("""
-SELECT COUNT(DISTINCT subject_id), 
-COUNT(DISTINCT hadm_id), COUNT(DISTINCT icd9_code)
-FROM diagnoses_icd_m2
-""").show()
-
-spark.sql("""
-SELECT icd9_code, COUNT(DISTINCT subject_id) AS sid_count
-FROM diagnoses_icd_m2
-GROUP BY icd9_code
-ORDER BY sid_count DESC
-LIMIT 50
-""").show(n=50)
-
-spark.sql("""
-SELECT icd9_code, COUNT(DISTINCT hadm_id) AS hadm_count
-FROM diagnoses_icd_m2
-GROUP BY icd9_code
-ORDER BY hadm_count DESC
-LIMIT 50
-""").show(n=50)
-
-icd9_score_hadm = spark.sql("""
+icd9code_score_hadm = spark.sql("""
 SELECT icd9_code, COUNT(DISTINCT hadm_id) AS score
 FROM diagnoses_icd_m2
 GROUP BY icd9_code
 """).rdd.cache()
 
-icd9_score_subj = spark.sql("""
+icd9code_score_subj = spark.sql("""
 SELECT icd9_code, COUNT(DISTINCT subject_id) AS score
 FROM diagnoses_icd_m2
 GROUP BY icd9_code
 """).rdd.cache()
 
-def get_id_to_topicd9(id_type, topX):
-    if id_type == "hadm_id":
-        icd9_score = icd9_score_hadm
-    else:
-        icd9_score = icd9_score_subj
+icd9cat_score_hadm = spark.sql("""
+SELECT icd9_cat AS icd9_code, COUNT(DISTINCT hadm_id) AS score
+FROM diagnoses_icd_m2
+GROUP BY icd9_cat
+""").rdd.cache()
+
+icd9cat_score_subj = spark.sql("""
+SELECT icd9_cat AS icd9_code, COUNT(DISTINCT subject_id) AS score
+FROM diagnoses_icd_m2
+GROUP BY icd9_cat
+""").rdd.cache()
+
+def get_id_to_topicd9(id_type, icdcode, topX):
+    if id_type == "hadm_id" and icdcode:
+        icd9_score = icd9code_score_hadm
+    elif id_type == "hadm_id" and not icdcode:
+        icd9_score = icd9cat_score_hadm
+    elif id_type == "subject_id" and icdcode:
+        icd9_score = icd9code_score_subj
+    elif id_type == "subject_id" and not icdcode:
+        icd9_score = icd9cat_score_subj
+    else: #default
+        icd9_score = icd9code_score_hadm
+    
         
-    icd9_topX = set([i.icd9_code for i in icd9_score.takeOrdered(topX, key=lambda x: -x.score)])
+    icd9_topX2 = [i.icd9_code for i in icd9_score.takeOrdered(topX, key=lambda x: -x.score)]
+    if not icdcode:
+        icd9_topX2 = ['c'+str(i) for i in icd9_topX2]
+    else:
+        icd9_topX2 = [str(i) for i in icd9_topX2]
+    icd9_topX = set(icd9_topX2)
     
     id_to_topicd9 = df_diag_m2.rdd \
-        .map(lambda x: (x.hadm_id if id_type=="hadm_id" else x.subject_id, x.icd9_code)) \
+        .map(lambda x: (x.hadm_id if id_type=="hadm_id" else x.subject_id, x.icd9_code if icdcode else 'c'+str(x.icd9_cat))) \
         .groupByKey() \
         .mapValues(lambda x: set(x) & icd9_topX) \
         .filter(lambda (x, y): y)
         
-    return id_to_topicd9, list(icd9_topX)
+    return id_to_topicd9, list(icd9_topX2)
 
-# for i in get_id_to_topicd9("hadm_id", 10)[0].take(3):
-#     print i
-# for i in get_id_to_topicd9("subject_id", 50)[0].take(3):
-#     print i
+print get_id_to_topicd9("hadm_id", True, 50)
+print get_id_to_topicd9("subject_id", True, 50)
+print get_id_to_topicd9("hadm_id", False, 50)
+print get_id_to_topicd9("subject_id", False, 50)
+
+import re
 
 def sparse2vec(mapper, data):
     out = [0] * len(mapper)
-    for i in data:
-        out[mapper[i]] = 1
+    if data != None:
+        for i in data:
+            out[mapper[i]] = 1
     return out
-
-def get_id_to_texticd9(id_type, topX):
-    id_to_topicd9, topicd9 = get_id_to_topicd9(id_type, topX)
-    mapper = dict(zip(topicd9, range(topX)))
     
+def get_id_to_texticd9(id_type, topX, stopwords=[]):
+    def remstopwords(text):
+        text = re.sub('\[\*\*[^\]]*\*\*\]', '', text)
+        text = re.sub('<[^>]*>', '', text)
+        text = re.sub('[\W]+', ' ', text.lower()) 
+        text = re.sub(" \d+", " ", text)
+        return " ".join([i for i in text.split() if i not in stopwords])
+    
+    id_to_topicd9code, topicd9code = get_id_to_topicd9(id_type, True, topX)
+    id_to_topicd9cat, topicd9cat = get_id_to_topicd9(id_type, False, topX)
+    topX2 = 2 * topX
+    topicd9 = topicd9code+topicd9cat
+    mapper = dict(zip(topicd9, range(topX2)))
+    
+    id_to_topicd9 = id_to_topicd9code.fullOuterJoin(id_to_topicd9cat) \
+        .map(lambda (id_, (icd9code, icd9cat)): (id_, \
+                                                 (icd9code if icd9code else set()) | \
+                                                 (icd9cat if icd9cat else set())))
+        
     ne_topX = df_ne.rdd \
         .filter(lambda x: x.category == "Discharge summary") \
         .map(lambda x: (x.hadm_id if id_type=="hadm_id" else x.subject_id, x.text)) \
         .groupByKey() \
         .mapValues(lambda x: " ".join(x)) \
-        .join(id_to_topicd9) \
+        #.join(id_to_topicd9) \ # involve only data related to top10
+        # involve all data, even those not related to top10
+        .leftOuterJoin(id_to_topicd9) \
         .map(lambda (id_, (text, icd9)): \
-             [id_, text]+sparse2vec(mapper, icd9))
+             [id_]+sparse2vec(mapper, icd9)+[text if len(stopwords) == 0 else remstopwords(text)])
 #              list(Vectors.sparse(topX, dict.fromkeys(map(lambda x: mapper[x], icd9), 1))))
-        
-    return spark.createDataFrame(ne_topX, ["id", "text"]+topicd9), mapper
+            
+    return spark.createDataFrame(ne_topX, ["id"]+topicd9+["text"]), topicd9
 
 # get_id_to_texticd9("hadm_id", 10)[0].show()
 
-from pyspark.ml.feature import HashingTF, IDF, RegexTokenizer, StopWordsRemover
+import pickle
 
-def create_TFIDF(sentenceData, inputCol="text", outputCol="features", minDocFreq=3, numFeatures=20):
-    tokenizer = RegexTokenizer(pattern="[.:\s]+", inputCol=inputCol, outputCol="z_words")
-    wordsData = tokenizer.transform(sentenceData)
-    
-    remover = StopWordsRemover(inputCol="z_words", outputCol="z_filtered")
-    wordsDataFiltered = remover.transform(wordsData)
-    
-    hashingTF = HashingTF(inputCol="z_filtered", outputCol="z_rawFeatures", numFeatures=numFeatures)
-    featurizedData = hashingTF.transform(wordsDataFiltered)
-    # alternatively, CountVectorizer can also be used to get term frequency vectors
+ICD9CODES = spark.sql("""
+SELECT DISTINCT icd9_code FROM diagnoses_icd_m2
+""").rdd.map(lambda x: x.icd9_code).collect()
+ICD9CODES = [str(i).lower() for i in ICD9CODES]
 
-    idf = IDF(inputCol="z_rawFeatures", outputCol=outputCol, minDocFreq=minDocFreq)
-    idfModel = idf.fit(featurizedData)
-    rescaledData = idfModel.transform(featurizedData)
-    
-    return rescaledData.drop("z_words", "z_filtered", "z_rawFeatures", inputCol)
+pickle.dump(ICD9CODES, open( "./data/ICD9CODES.p", "wb" ))
 
-from pyspark.mllib.util import Vectors
-from pyspark.mllib.linalg import VectorUDT
-from pyspark.sql.functions import UserDefinedFunction
-from pyspark.sql.types import DataType, StringType
+import time
+t0 = time.time()
 
-def output_csv(df, path):
-    udf = UserDefinedFunction(lambda x: Vectors.stringify(x), StringType())
-    new_df = df.withColumn('features', udf(df.features))
-    
-    new_df.write.csv(path, header=True)
-    
-def read_csv(path):
-    df = spark.read.csv(path, header=True, inferSchema=True)
-    
-    udf = UserDefinedFunction(lambda x: Vectors.parse(x), VectorUDT())
-    new_df = df.withColumn('features', udf(df.features))
-    
-    return new_df
+df_id2texticd9, topicd9 = get_id_to_texticd9("hadm_id", 50)
+df_id2texticd9.write.csv("./data/DATA_HADM", header=True)
 
-df_id2texticd9, topicd9_mapper = get_id_to_texticd9("hadm_id", 10)
-df_id2featurelabel = create_TFIDF(df_id2texticd9, numFeatures=40000)
+print topicd9
+print df_id2texticd9.count()
+print time.time() - t0
 
-print topicd9_mapper
-print df_id2featurelabel.dtypes
-df_id2featurelabel.show()
+df_id2texticd9.show()
 
-output_csv(df_id2featurelabel, "./data/DATA_TFIDF_HADM_TOP10")
+import pickle
 
-testdf = read_csv("./data/DATA_TFIDF_HADM_TOP10")
-print testdf.count()
-testdf.show()
+print topicd9[:10]
+pickle.dump(topicd9[:10], open( "./data/ICD9CODES_TOP10.p", "wb" ))
+print topicd9[:50]
+pickle.dump(topicd9[:50], open( "./data/ICD9CODES_TOP50.p", "wb" ))
+print topicd9[50:60]
+pickle.dump(topicd9[50:60], open( "./data/ICD9CAT_TOP10.p", "wb" ))
+print topicd9[50:]
+pickle.dump(topicd9[50:], open( "./data/ICD9CAT_TOP50.p", "wb" ))
+
+import time
+from nltk.corpus import stopwords
+
+t0 = time.time()
+STOPWORDS_WORD2VEC = stopwords.words('english') + ICD9CODES
+
+df_id2texticd9, topicd9 = get_id_to_texticd9("hadm_id", 50, stopwords=STOPWORDS_WORD2VEC)
+df_id2texticd9.write.csv("./data/DATA_HADM_CLEANED", header=True)
+df_id2texticd9.cache()
+
+print topicd9
+print df_id2texticd9.count()
+print time.time() - t0
+df_id2texticd9.show()
+
+import pandas as pd
+df = pd.read_csv("./data/DATA_HADM.csv", escapechar='\\')
+print df.head()
 
 spark.sql("""
 SELECT icd9_code
@@ -328,18 +261,19 @@ ORDER BY COUNT(DISTINCT hadm_id) DESC
 LIMIT 10
 """).show()
     
-id_to_topicd9, topicd9 = get_id_to_topicd9("hadm_id", 10)
-print id_to_topicd9.count()
+# id_to_topicd9, topicd9 = get_id_to_topicd9("hadm_id", 10)
+# print id_to_topicd9.count()
 
-spark.sql("""
-SELECT COUNT(DISTINCT hadm_id) AS hadm_count
-FROM diagnoses_icd_m2
-WHERE icd9_code IN
-    (SELECT icd9_code
-    FROM diagnoses_icd_m2
-    GROUP BY icd9_code
-    ORDER BY COUNT(DISTINCT hadm_id) DESC
-    LIMIT 10)
-""").show()
+# spark.sql("""
+# SELECT COUNT(DISTINCT hadm_id) AS hadm_count
+# FROM diagnoses_icd_m2
+# WHERE icd9_code IN
+#     (SELECT icd9_code
+#     FROM diagnoses_icd_m2
+#     GROUP BY icd9_code
+#     ORDER BY COUNT(DISTINCT hadm_id) DESC
+#     LIMIT 10)
+# """).show()
 
-sc.stop()
+#sc.stop()
+print "Done!"

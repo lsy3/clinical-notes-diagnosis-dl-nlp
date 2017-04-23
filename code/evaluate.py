@@ -2,7 +2,7 @@ import numpy as np
 from sklearn.metrics import *
 
 
-def evaluate_1(test_label, test_pred, gettopX=-1):
+def evaluate_1(test_label, test_pred, gettopX=-1, getfirstX=-1, geteveryX=-1):
     precision_list = np.zeros((test_label.shape[1]))
     recall_list = np.zeros((test_label.shape[1]))
     f1_list = np.zeros((test_label.shape[1]))
@@ -43,29 +43,39 @@ def evaluate_1(test_label, test_pred, gettopX=-1):
         out['f1_mean2'] = np.mean(np.nan_to_num(f1_list))
         out['f1_std2'] = np.std(np.nan_to_num(f1_list))
 
-    if gettopX > 0:
-        idx = np.argsort(np.nan_to_num(f1_list))[-gettopX:]
-        out['prec_meantop'] = np.mean(precision_list[idx])
-        out['prec_stdtop'] = np.std(precision_list[idx])
-        out['recall_meantop'] = np.mean(recall_list[idx])
-        out['recall_stdtop'] = np.std(recall_list[idx])
-        out['acc_meantop'] = np.mean(accuracy_list[idx])
-        out['acc_stdtop'] = np.std(accuracy_list[idx])
-        out['f1_meantop'] = np.mean(f1_list[idx])
-        out['f1_stdtop'] = np.std(f1_list[idx])
+    runs = []
+    if gettopX > 0: runs.append(('top', gettopX))
+    if getfirstX > 0: runs.append(('first', getfirstX))
+    for i in xrange(0, test_label.shape[1], geteveryX):
+        runs.append(('every{0}'.format(i/geteveryX),(i,i+geteveryX)))
+    for code, num in runs:
+
+        if code == 'top':
+            idx = np.argsort(np.nan_to_num(f1_list))[-num:]
+        elif code == 'first':
+            idx = xrange(num)
+        elif code[:5] == 'every':
+            idx = xrange(num[0],num[1])
+
+        out['prec_mean'+code] = np.mean(precision_list[idx])
+        out['prec_std'+code] = np.std(precision_list[idx])
+        out['recall_mean'+code] = np.mean(recall_list[idx])
+        out['recall_std'+code] = np.std(recall_list[idx])
+        out['acc_mean'+code] = np.mean(accuracy_list[idx])
+        out['acc_std'+code] = np.std(accuracy_list[idx])
+        out['f1_mean'+code] = np.mean(f1_list[idx])
+        out['f1_std'+code] = np.std(f1_list[idx])
         if np.isnan(np.sum(precision_list[idx])):
-            out['prec_meantop2'] = np.mean(np.nan_to_num(precision_list[idx]))
-            out['prec_stdtop2'] = np.std(np.nan_to_num(precision_list[idx]))
+            out['prec_mean'+code+'2'] = np.mean(np.nan_to_num(precision_list[idx]))
+            out['prec_std'+code+'2'] = np.std(np.nan_to_num(precision_list[idx]))
         if np.isnan(np.sum(recall_list[idx])):
-            out['recall_meantop2'] = np.mean(np.nan_to_num(recall_list[idx]))
-            out['recall_stdtop2'] = np.std(np.nan_to_num(recall_list[idx]))
+            out['recall_mean'+code+'2'] = np.mean(np.nan_to_num(recall_list[idx]))
+            out['recall_std'+code+'2'] = np.std(np.nan_to_num(recall_list[idx]))
         if np.isnan(np.sum(f1_list[idx])):
-            out['f1_meantop2'] = np.mean(np.nan_to_num(f1_list[idx]))
-            out['f1_stdtop2'] = np.std(np.nan_to_num(f1_list[idx]))
+            out['f1_mean'+code+'2'] = np.mean(np.nan_to_num(f1_list[idx]))
+            out['f1_std'+code+'2'] = np.std(np.nan_to_num(f1_list[idx]))
 
     return out
-
-
 
 def evaluate_2(y_true, y_pred, prob = 0.5):
     pred_label = np.copy(y_pred)

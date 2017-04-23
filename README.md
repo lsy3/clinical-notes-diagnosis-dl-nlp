@@ -8,7 +8,7 @@ Members:
 To be deleted soon
 1. Final Report (draft): [overleaf link](https://www.overleaf.com/8371794wnkynjkydwsn#/31606347/)
 1. Cesar's google drive with word2vec and doc2vec models
-    1. (https://drive.google.com/open?id=0B5wTZcZsz2x7eVhaNkJoNkNWaWs)
+    1. [here](https://drive.google.com/open?id=0B5wTZcZsz2x7eVhaNkJoNkNWaWs)
 
 ### Environment Setup (local)
 1. conda env create -f environment.yml
@@ -19,7 +19,11 @@ To be deleted soon
 1. jupyter toree install --user --spark_home=<complete path>/spark-2.1.0-bin-hadoop2.7 --interpreters=PySpark
 1. Extract the ff. files to the directory "code/data":
     * DIAGNOSES_ICD.csv (from bd4h piazza)
-    * NOTEEVENTS-2.csv (cleaned version of NOTEEVENTS.csv; can be downloaded [here](https://drive.google.com/open?id=0B7IQxoKP3KPGWmFiUGlNTTBuWXM)
+    * NOTEEVENTS-2.csv (cleaned version of NOTEEVENTS.csv) [Luke's Google Drive](https://drive.google.com/open?id=0B7IQxoKP3KPGWmFiUGlNTTBuWXM)
+    * D_ICD_DIAGNOSES.csv (from bd4h piazza)
+    * model_word2vec_v2_*dim.txt [Cesar's Google Drive](https://drive.google.com/open?id=0B5wTZcZsz2x7eVhaNkJoNkNWaWs)
+    * bio_nlp_vec/PubMed-shuffle-win-*.txt [Download here](https://github.com/cambridgeltl/BioNLP-2016) (you will need to convert the .bin files to .txt. I used gensim to do this)
+    * model_doc2vec_v2_*dim_final.csv [Cesar's Google Drive](https://drive.google.com/open?id=0B5wTZcZsz2x7eVhaNkJoNkNWaWs)
 1. To run data preprocessing, data statistics, and ipynb related stuff, start the jupyter notebook. Don't forget to set the kernel to "Toree Pyspark".
     * jupyter notebook
 1. To run the deep learning experiments, follow the corresponding guide below.
@@ -53,13 +57,17 @@ To be deleted soon
 
 ### Folder Structure
 * code: all source code
-    * data (you should download and extract the following here)
-        * DIAGNOSES_ICD.csv
-        * NOTEEVENTS.csv
-        * PATIENTS.csv (will probably not use this)
-* literature: important papers (pretty much the same w/ what is on slack)
-* proposal: other proposal related documents
-* 
+    * data: you should download and extract the data mentioned in "Environment Setup (local)"
+* report: latex source for this study's paper
+
+### General Pipeline
+1. (optional) cleaned NOTEEVENTS.csv using postgresql. imported NOTEEVENTS.csv by modifying [mimic iii github](https://github.com/MIT-LCP/mimic-code) and using the commands "select regexp_replace(field, E'[\\n\\r]+', ' ', 'g' )". the cleaned version (NOTEEVENTS-2.csv) can be downloaded in the google drive mentioned in "Environment Setup (local)"
+1. run preprocess.ipynb to produce DATA_HADM and DATA_HADM_CLEANED.
+1. run describe_icd9code.ipynb and describe_icd9category.ipynb to produce the descriptive statistics.
+1. run feature_extraction_seq.ipynb and feature_extraction_nonseq.ipynb to produce the input features for the machine learning and deep learning classifiers.
+1. run ml_baseline.py to get the results for Logistic Regression and Random Forest.
+1. run nn_baseline_train.py and nn_baseline_test.py to get the results for Feed-Forward Neural Network.
+1. run wordseq_train.py and wordseq_test.py to get the results for Conv1D, RNN, LSTM and GRU (refer to 'help' or the guide below on training and testing for Keras Deep Learning Models)
 
 ### Training and Testing for Keras Deep Learning Models
 * Prerequirest: Keras + Tensorflow, or Keras + Theano
@@ -85,24 +93,3 @@ To be deleted soon
     * Test model with specified model name: `$ CUDA_VISIBLE_DEVICES=0 python tfidf_test.py --model_name nn_model_1 --batch_size 128`   
     * `--model_name` default: `model_name = 'nn_model_1'`
     * `--batch_size` default: `batch_size = 128`
-
-### Todo List
-1. Data Preprocessing
-    1. ~~top 10 all~~ 
-    1. top 50 all
-    1. ~~top 10 category~~
-    1. top 50 category
-    1. consider doing advance test and train split
-        * maintain the test-train ratio of each category instead of just the test-train ratio of the whole dataset
-1. Feature Selection
-    1. bag of words
-        * consider removing "very frequent words / stop words of the medical field" (Cesar's suggestion) 
-    1. word2vec
-1. Model Training and Testing
-    1. Logistic Regression
-        * implemented using spark.ml instead of spark.mllib. [reason in this link](http://stackoverflow.com/questions/30231840/difference-between-org-apache-spark-ml-classification-and-org-apache-spark-mllib)
-    1. Random Forest
-    1. Feed Forward NN
-    1. RNN
-    1. LSTM
-    1. GRU

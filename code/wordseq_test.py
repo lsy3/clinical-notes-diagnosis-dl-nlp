@@ -22,13 +22,18 @@ def parse_args():
     parser.add_argument('--prob', dest ='prob', help='prob for activate the label', default=0.5, type=float)
     parser.add_argument('--argmax', dest='argmax', help='argmax trigger', default=False)
     parser.add_argument('--eval_topN', dest='eval_topN', help='evaluate only the top N labels (ordered by f1 score)', default=-1, type=int)
+    parser.add_argument('--eval_firstN', dest='eval_firstN', help='evaluate only the first N labels', default=-1, type=int)
+    parser.add_argument('--eval_everyN', dest='eval_everyN', help='evaluate every N labels', default=-1, type=int)
+    parser.add_argument('--labelmode', dest ='labelmode', 
+                        help='additional label processing. Option: tile<num>, repeat<num>, range<num>_<num>',
+                        default='', type=str)
+
     if len(sys.argv) == 1:
         parser.print_help()
         print ('Run Default Settings ....... ')
 
     args = parser.parse_args()
     return args
-
 
 def test(args):
     
@@ -47,6 +52,22 @@ def test(args):
     train_label = loaded_data[4]
     # val_label = loaded_data[5]
     test_label = loaded_data[6]
+
+    if args.labelmode[:4] == 'tile':
+        n = int(args.labelmode[4:].strip())
+        train_label = np.tile(train_label, n)
+        test_label = np.tile(test_label, n)
+        print 'labelmode: tile {0}'.format(train_label.shape)
+    elif args.labelmode[:6] == 'repeat':
+        n = int(args.labelmode[6:].strip())
+        train_label = np.repeat(train_label, n, axis=1)
+        test_label = np.repeat(test_label, n, axis=1)
+        print 'labelmode: repeat {0}'.format(train_label.shape)
+    elif args.labelmode[:5] == 'range':
+        n = [int(i) for i in args.labelmode[5:].split("_")]
+        train_label = train_label[:,n[0]:n[1]]
+        test_label = test_label[:,n[0]:n[1]]
+        print 'labelmode: range {0}'.format(train_label.shape)
 
     f = open(args.embmatrix)
     embedding_matrix = cPickle.load(f)
@@ -84,51 +105,44 @@ def test(args):
         train_pred = model.predict(train_sequence, batch_size=batch_size, verbose=0)
         train_pred[train_pred >= args.prob] = 1
         train_pred[train_pred < args.prob] = 0
-    trainEval = evaluate_1(train_label, train_pred, gettopX=args.eval_topN)
-    testEval = evaluate_1(test_label, test_pred, gettopX=args.eval_topN)
 
-    print model_name + args.pre_train_append
-    print "train: "
-    for i in ['prec', 'recall', 'acc', 'f1']:
-        print "{0}: {1} std: {2}".format(i,
-                                         trainEval["{0}_mean".format(i)],
-                                         trainEval["{0}_std".format(i)])
-        if "{0}_mean2".format(i) not in trainEval: continue
-        print "{0}_zeronan: {1} std: {2}".format(i,
-                                             trainEval["{0}_mean2".format(i)],
-                                             trainEval["{0}_std2".format(i)])
+    trainEval = evaluate_1(train_label, train_pred, gettopX=args.eval_topN,
+                           getfirstX=args.eval_firstN,
+                           geteveryX=args.eval_everyN)
+    testEval = evaluate_1(test_label, test_pred, gettopX=args.eval_topN,
+                          getfirstX=args.eval_firstN,
+                          geteveryX=args.eval_everyN)
+
+    runs = [('', 1), ('top', args.eval_topN), ('first', args.eval_firstN)]
+    for i in xrange(0,test_label.shape[1]/args.eval_everyN):
+        runs.append(('every{0}'.format(i),args.eval_everyN))
+
+    for code, num in runs: 
+        if num < 0: continue
+
+        print "{0}{1} {2}{3}".format(model_name, args.pre_train_append,
+                                     code, num if code != '' else '')
+        print "train: "
+
+        for i in ['prec', 'recall', 'acc', 'f1']:
+            print "{0}: {1} std: {2}".format(i,
+                                         trainEval["{0}_mean{1}".format(i,code)],
+                                         trainEval["{0}_std{1}".format(i,code)])
+            if "{0}_mean{1}2".format(i,code) not in trainEval: continue
+            print "{0}_zeronan: {1} std: {2}".format(i,
+                                             trainEval["{0}_mean{1}2".format(i,code)],
+                                             trainEval["{0}_std{1}2".format(i,code)])
     
-    print "test:"
-    for i in ['prec', 'recall', 'acc', 'f1']:
-        print "{0}: {1} std: {2}".format(i,
-                                         testEval["{0}_mean".format(i)],
-                                         testEval["{0}_std".format(i)])
-        if "{0}_mean2".format(i) not in testEval: continue
-        print "{0}_zeronan: {1} std: {2}".format(i,
-                                             testEval["{0}_mean2".format(i)],
-                                             testEval["{0}_std2".format(i)])
-
-    if args.eval_topN > 0:
-        print "\n" + model_name + args.pre_train_append + " top{0}".format(args.eval_topN)
-        print "train"
+        print "test:"
         for i in ['prec', 'recall', 'acc', 'f1']:
             print "{0}: {1} std: {2}".format(i,
-                                             trainEval["{0}_meantop".format(i)],
-                                             trainEval["{0}_stdtop".format(i)])
-            if "{0}_meantop2".format(i) not in trainEval: continue
+                                         testEval["{0}_mean{1}".format(i,code)],
+                                         testEval["{0}_std{1}".format(i,code)])
+            if "{0}_mean{1}2".format(i,code) not in testEval: continue
             print "{0}_zeronan: {1} std: {2}".format(i,
-                                             trainEval["{0}_meantop2".format(i)],
-                                             trainEval["{0}_stdtop2".format(i)])
-
-        print "test"
-        for i in ['prec', 'recall', 'acc', 'f1']:
-            print "{0}: {1} std: {2}".format(i,
-                                             testEval["{0}_meantop".format(i)],
-                                             testEval["{0}_stdtop".format(i)])
-            if "{0}_meantop2".format(i) not in testEval: continue
-            print "{0}_zeronan: {1} std: {2}".format(i,
-                                             testEval["{0}_meantop2".format(i)],
-                                             testEval["{0}_stdtop2".format(i)])
+                                             testEval["{0}_mean{1}2".format(i,code)],
+                                             testEval["{0}_std{1}2".format(i,code)])
+        print ""
 
 
 def test_auto(args):
@@ -214,4 +228,5 @@ if __name__ == '__main__':
     args = parse_args()
     if args.gpu:
         os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
-    test_auto(args)
+    #test_auto(args)
+    test(args)
