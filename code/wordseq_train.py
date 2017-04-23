@@ -23,7 +23,7 @@ def parse_args():
     parser.add_argument('--plot_model', dest = 'plot_model', help='plot the said model', default=True)
     parser.add_argument('--patience', dest ='patience', help='patient for early stopper', default=5, type=int)
     parser.add_argument('--labelmode', dest ='labelmode', 
-                        help='additional label processing. Option: tile<num>, repeat<num>',
+                        help='additional label processing. Option: tile<num>, repeat<num>, range<num>_<num>',
                         default='', type=str)
 
     if len(sys.argv) == 1:
@@ -63,10 +63,10 @@ def train(args):
         val_label = np.repeat(val_label, n, axis=1)
         print 'labelmode: repeat {0}'.format(train_label.shape)
     elif args.labelmode[:5] == 'range':
-        n = [int(i) for i in args.labelmode[5:].split(" ")]
+        n = [int(i) for i in args.labelmode[5:].split("_")]
         train_label = train_label[:,n[0]:n[1]]
         val_label = val_label[:,n[0]:n[1]]
-        print 'labelmode: repeat {0}'.format(train_label.shape)
+        print 'labelmode: range{0}'.format(train_label.shape)
 
     # f = open('./data/dictionary_v0.p', 'wb')
     # cPickle.dump(dictionary, f)

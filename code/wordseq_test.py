@@ -24,7 +24,7 @@ def parse_args():
     parser.add_argument('--eval_topN', dest='eval_topN', help='evaluate only the top N labels (ordered by f1 score)', default=-1, type=int)
     parser.add_argument('--eval_firstN', dest='eval_firstN', help='evaluate only the first N labels', default=-1, type=int)
     parser.add_argument('--labelmode', dest ='labelmode', 
-                        help='additional label processing. Option: tile<num>, repeat<num>',
+                        help='additional label processing. Option: tile<num>, repeat<num>, range<num>_<num>',
                         default='', type=str)
 
     if len(sys.argv) == 1:
@@ -62,6 +62,11 @@ def test(args):
         train_label = np.repeat(train_label, n, axis=1)
         test_label = np.repeat(test_label, n, axis=1)
         print 'labelmode: repeat {0}'.format(train_label.shape)
+    elif args.labelmode[:5] == 'range':
+        n = [int(i) for i in args.labelmode[5:].split("_")]
+        train_label = train_label[:,n[0]:n[1]]
+        test_label = test_label[:,n[0]:n[1]]
+        print 'labelmode: range {0}'.format(train_label.shape)
 
     f = open(args.embmatrix)
     embedding_matrix = cPickle.load(f)
