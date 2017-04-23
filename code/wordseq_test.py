@@ -23,6 +23,9 @@ def parse_args():
     parser.add_argument('--argmax', dest='argmax', help='argmax trigger', default=False)
     parser.add_argument('--eval_topN', dest='eval_topN', help='evaluate only the top N labels (ordered by f1 score)', default=-1, type=int)
     parser.add_argument('--eval_firstN', dest='eval_firstN', help='evaluate only the first N labels', default=-1, type=int)
+    parser.add_argument('--labelmode', dest ='labelmode', 
+                        help='additional label processing. Option: tile<num>, repeat<num>',
+                        default='', type=str)
 
     if len(sys.argv) == 1:
         parser.print_help()
@@ -48,6 +51,17 @@ def test(args):
     train_label = loaded_data[4]
     # val_label = loaded_data[5]
     test_label = loaded_data[6]
+
+    if args.labelmode[:4] == 'tile':
+        print 'labelmode: tile'
+        n = int(args.labelmode[4:].strip()
+        train_label = np.tile(train_label, n)
+        test_label = np.tile(test_label, n)
+    elif args.labelmode[:6] == 'repeat':
+        print 'labelmode: repeat'
+        n = int(args.labelmode[6:].strip()
+        train_label = np.repeat(train_label, n, axis=1)
+        test_label = np.repeat(test_label, n, axis=1)
 
     f = open(args.embmatrix)
     embedding_matrix = cPickle.load(f)
