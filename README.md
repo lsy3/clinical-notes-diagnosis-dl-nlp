@@ -69,27 +69,19 @@ To be deleted soon
 1. run nn_baseline_train.py and nn_baseline_test.py to get the results for Feed-Forward Neural Network.
 1. run wordseq_train.py and wordseq_test.py to get the results for Conv1D, RNN, LSTM and GRU (refer to 'help' or the guide below on training and testing for Keras Deep Learning Models)
 
-### Training and Testing for Keras Deep Learning Models
+### Training and Testing for Feed Forward Neural Network
 * Prerequirest: Keras + Tensorflow, or Keras + Theano
-* all the models are specified in `dl_models.py` file. 
-* run `tfidf_preprocessing` to prapare the data for deep learning training and testing use. 
-* training:
-    * Run training script with input arguments: `python tfidf_train.py --epoch 10 --batch_size 128 --model_name nn_model_1 --pre_train False`
-    * `--epoch`: number of passes over the entire dataset, default: `epoch = 50`
-    * `--batch_size`: number of samples in batch training, default: `batch_size = 128`
-    * `--model_name`: provide function name in `dl_models.py` to call the corresonding model. We also save the trained weights use the provided model name, as `weights_{model_name}.h5`, default: `model_name = 'nn_model_1'`
-    * `--pre_train`: by default is False, if set to True, model will first load the pretrained weights from `weights_{model_name}.h5`, then continue the training. default: `pre_train = False`
-    *  You can also run training with default arguments: `pythno tfidf_train.py`, 
-    *  NOTE: TensorFlow will attempt to use (an equal fraction of the memory of) all GPU devices that are visible to it. If you want to run different sessions on different GPUs, you should do the following.
-        *   Run each session in a different Python process.
-        *   Start each process with a different value for the CUDA_VISIBLE_DEVICES environment variable. For example, if you want to test 2 different models specified in `dl_models.py` for tfidf data and you have 4 GPUs, you could run the following:
-        *   `$ CUDA_VISIBLE_DEVICES=0 python tfidf_train.py --epoch 10 --batch_size 128 --model_name nn_model_1 --pretrain False` # Uses GPU 0.
-        *   `$ CUDA_VISIBLE_DEVICES=1 python tfidf_train.py --epoch 10 --batch_size 128 --model_name nn_model_1 --pretrain False` # Uses GPU 1.
-        *   You can also use multiple gpus in one script. (not supported in our code)
-        *   `$ CUDA_VISIBLE_DEVICES=2,3 python some_script.py`  # Uses GPUs 2 and 3.
-        *   The GPU devices in TensorFlow will still be numbered from zero (i.e. "/gpu:0" etc.), but they will correspond to the devices that you have made visible with CUDA_VISIBLE_DEVICES
+* models are specified in `nn_baseline_models.py`
+* run `nn_baseline_preprocessing` to prapare the data for training and testing use. 
+* Training:
+    * You can also run training with default arguments: `pythno nn_baseline_train.py`,
+    * Or run training script with customized input arguments: `python nn_baseline_train.py --epoch 10 --batch_size 128 --model_name nn_model_1 --pre_train False`
+    * Please refer to `parse_args()` function in `nn_baseline_train.py` for the full list of the input arguments 
+    
+* Testing:
+    * Test model with default model and data file: `python tfidf_test.py`   
+    * Please refer to `parse_args()` function in `nn_baseline_train.py` for the full list of the input arguments
+    
 
-* testing:
-    * Test model with specified model name: `$ CUDA_VISIBLE_DEVICES=0 python tfidf_test.py --model_name nn_model_1 --batch_size 128`   
-    * `--model_name` default: `model_name = 'nn_model_1'`
-    * `--batch_size` default: `batch_size = 128`
+### Training and Testing for Recurrent and Convolution Neural Network
+* Similar to Feed Forward Neural Network, users can run the training and tesing with the default settings in `wordseq_train.py` and `wordseq_test.py`. All the model architectures are specified in `wordseq_models.py`
