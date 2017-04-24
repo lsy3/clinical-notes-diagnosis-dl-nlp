@@ -218,7 +218,7 @@ def test_multi_label_para(model_name, args):
     for i in feature_file_list:
         for j in data_file_list:
             data_file = i + '_' + j
-            full_path = './data/BASELINE/' + data_file + '.p'
+            full_path = './data/' + data_file + '.p'
 
             f = open(full_path, 'rb')
             loaded_data = []
@@ -234,20 +234,20 @@ def test_multi_label_para(model_name, args):
             test_label = loaded_data[5]
             feature_size = loaded_data[6]
 
-            # if args.labelmode[:4] == 'tile':
-            #     n = int(args.labelmode[4:].strip()
-            #     train_label = np.tile(train_label, n)
-            #     valid_label = np.tile(valid_label, n)
-            #     test_label = np.tile(test_label, n)
-            #     print 'labelmode: tile {0}'.format(train_label.shape)
-            # elif args.labelmode[:6] == 'repeat':
-            #     n = int(args.labelmode[6:].strip()
-            #     train_label = np.repeat(train_label, n, axis=1)
-            #     valid_label = np.repeat(valid_label, n, axis=1)
-            #     test_label = np.repeat(test_label, n, axis=1)
-            #     print 'labelmode: repeat {0}'.format(train_label.shape)
+            if args.labelmode[:4] == 'tile':
+                n = int(args.labelmode[4:].strip()
+                train_label = np.tile(train_label, n)
+                valid_label = np.tile(valid_label, n)
+                test_label = np.tile(test_label, n)
+                print 'labelmode: tile {0}'.format(train_label.shape)
+            elif args.labelmode[:6] == 'repeat':
+                n = int(args.labelmode[6:].strip()
+                train_label = np.repeat(train_label, n, axis=1)
+                valid_label = np.repeat(valid_label, n, axis=1)
+                test_label = np.repeat(test_label, n, axis=1)
+                print 'labelmode: repeat {0}'.format(train_label.shape)
 
-            file_path = './data/cache/NN_MODELS'
+            file_path = './data/cache'
             weights_name = 'weight_' + model_name + '_' + data_file + '.h5'
 
             model_func = getattr(nn_baseline_models, model_name)
@@ -284,15 +284,6 @@ def test_multi_label_para(model_name, args):
             index_list.append(data_file)
             print "data_file name: ", data_file
 
-
-    column_list = ['precision', 'precision_std',
-               'recall', 'recall_std',
-               'accuracy', 'accuracy_std',
-               'f1', 'f1_std',
-               'hamming', 'hamming_std',
-               'auc_macro', 'auc_macro_std',
-               'auc_weighted', 'auc_weighted_std'
-               ]
     df = pd.DataFrame(np.array(test_res_list), index = index_list)
     df.to_csv('./data/' + model_name + '_test_res_.csv')
     df = pd.DataFrame(np.array(train_res_list), index = index_list)
