@@ -154,6 +154,9 @@ def evaluate_3(y_true, y_pred, prob = 0.5):
         auc_weighted_list[i] = sk_auc_weighted
 
     idx = np.argsort(np.nan_to_num(f1_list))
+    accuracy_top10 = accuracy_list[idx][-10:]
+    # f1_list_top5 = f1_list[idx][-5:]
+    f1_list_top10 = f1_list[idx][-10:]
     precision_list_top5 = precision_list[idx][-5:]
     precision_list_top10 = precision_list[idx][-10:]
     recall_list_top5 = recall_list[idx][-5:]
@@ -167,7 +170,8 @@ def evaluate_3(y_true, y_pred, prob = 0.5):
            np.mean(hamming_loss_list), np.std(hamming_loss_list),
            np.mean(auc_macro_list), np.std(auc_macro_list),
            np.mean(auc_weighted_list), np.std(auc_weighted_list),
-           np.mean(f1_list_top5), np.std(f1_list_top5),
+           np.mean(accuracy_top10), np.std(accuracy_top10),
+           # np.mean(f1_list_top5), np.std(f1_list_top5),
            np.mean(f1_list_top10), np.std(f1_list_top10),
            np.mean(precision_list_top5), np.std(precision_list_top5),
            np.mean(precision_list_top10), np.std(precision_list_top10),

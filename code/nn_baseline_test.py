@@ -81,17 +81,32 @@ def test_multi_label(args):
         for j in test_data[i]:
             test_data_dense[i, j[0]] = j[1]
 
-    # full_path = './data/tfidf_word2vec_top10_z.p'
-    # f = open(full_path, 'rb')
-    # loaded_data = []
-    # for i in range(2):  # [train_data, valid_data, test_data, train_label, valid_label, test_label, size]:
-    #     loaded_data.append(cPickle.load(f))
-    # f.close()
-    # test_data_dense -= loaded_data[0]
-    # test_data_dense /= loaded_data[1]
+
     test_pred = model.predict(test_data_dense, batch_size = batch_size, verbose=0)
-    test_pred[test_pred >= 0.5] = 1
-    test_pred[test_pred < 0.5] = 0
+    trainEval = evaluate_1(test_label, test_pred, gettopX=10)
+    testEval = evaluate_1(test_label, test_pred, gettopX=10)
+
+    print "train: "
+
+    for i in ['prec', 'recall', 'acc', 'f1']:
+        print "{0}: {1} std: {2}".format(i,
+                                         trainEval["{0}_mean{1}".format(i, code)],
+                                         trainEval["{0}_std{1}".format(i, code)])
+        if "{0}_mean{1}2".format(i, code) not in trainEval: continue
+        print "{0}_zeronan: {1} std: {2}".format(i,
+                                                 trainEval["{0}_mean{1}2".format(i, code)],
+                                                 trainEval["{0}_std{1}2".format(i, code)])
+
+    print "test:"
+    for i in ['prec', 'recall', 'acc', 'f1']:
+        print "{0}: {1} std: {2}".format(i,
+                                         testEval["{0}_mean{1}".format(i, code)],
+                                         testEval["{0}_std{1}".format(i, code)])
+        if "{0}_mean{1}2".format(i, code) not in testEval: continue
+        print "{0}_zeronan: {1} std: {2}".format(i,
+                                                 testEval["{0}_mean{1}2".format(i, code)],
+                                                 testEval["{0}_std{1}2".format(i, code)])
+    print ""
 
     precision_list = np.zeros((test_label.shape[1]))
     recall_list = np.zeros((test_label.shape[1]))
@@ -191,11 +206,11 @@ def test_multi_model():
 
 
 def test_multi_label_para(model_name, args):
-    # feature_file_list = ['TFIDFV0', 'TFIDFV1', 'WORD2VECV0', 'WORD2VECV1', 'WORD2VECV2', 'WORD2VECV3', 'WORD2VECV4']
+    feature_file_list = ['TFIDFV0', 'TFIDFV1', 'WORD2VECV0', 'WORD2VECV1', 'WORD2VECV2', 'WORD2VECV3', 'WORD2VECV4']
     # feature_file_list = ['DOC2VECV0', 'DOC2VECV1', 'DOC2VECV2']
-    feature_file_list = ['TFIDFV1']
-    # data_file_list = ['10', '10CAT', '50', '50CAT']
-    data_file_list = ['10', '10CAT']
+    # feature_file_list = ['TFIDFV1']
+    data_file_list = ['50', '50CAT']
+    # data_file_list = ['10', '10CAT']
     test_res_list = []
     train_res_list = []
     fake_res_list = []
@@ -203,7 +218,7 @@ def test_multi_label_para(model_name, args):
     for i in feature_file_list:
         for j in data_file_list:
             data_file = i + '_' + j
-            full_path = './data/' + data_file + '.p'
+            full_path = './data/BASELINE/' + data_file + '.p'
 
             f = open(full_path, 'rb')
             loaded_data = []
@@ -219,20 +234,20 @@ def test_multi_label_para(model_name, args):
             test_label = loaded_data[5]
             feature_size = loaded_data[6]
 
-            if args.labelmode[:4] == 'tile':
-                n = int(args.labelmode[4:].strip()
-                train_label = np.tile(train_label, n)
-                valid_label = np.tile(valid_label, n)
-                test_label = np.tile(test_label, n)
-                print 'labelmode: tile {0}'.format(train_label.shape)
-            elif args.labelmode[:6] == 'repeat':
-                n = int(args.labelmode[6:].strip()
-                train_label = np.repeat(train_label, n, axis=1)
-                valid_label = np.repeat(valid_label, n, axis=1)
-                test_label = np.repeat(test_label, n, axis=1)
-                print 'labelmode: repeat {0}'.format(train_label.shape)
+            # if args.labelmode[:4] == 'tile':
+            #     n = int(args.labelmode[4:].strip()
+            #     train_label = np.tile(train_label, n)
+            #     valid_label = np.tile(valid_label, n)
+            #     test_label = np.tile(test_label, n)
+            #     print 'labelmode: tile {0}'.format(train_label.shape)
+            # elif args.labelmode[:6] == 'repeat':
+            #     n = int(args.labelmode[6:].strip()
+            #     train_label = np.repeat(train_label, n, axis=1)
+            #     valid_label = np.repeat(valid_label, n, axis=1)
+            #     test_label = np.repeat(test_label, n, axis=1)
+            #     print 'labelmode: repeat {0}'.format(train_label.shape)
 
-            file_path = './data/cache'
+            file_path = './data/cache/NN_MODELS'
             weights_name = 'weight_' + model_name + '_' + data_file + '.h5'
 
             model_func = getattr(nn_baseline_models, model_name)
@@ -247,7 +262,7 @@ def test_multi_label_para(model_name, args):
                     test_data_dense[ii, jj[0]] = jj[1]
 
             test_pred = model.predict(test_data_dense, batch_size=256, verbose=0)
-            test_res = evaluate_2(test_label, test_pred)
+            test_res = evaluate_3(test_label, test_pred)
             test_res_list.append(test_res)
 
             del test_data_dense
@@ -259,12 +274,12 @@ def test_multi_label_para(model_name, args):
                     train_data_dense[ii, jj[0]] = jj[1]
 
             train_pred = model.predict(train_data_dense, batch_size=256, verbose=0)
-            train_res = evaluate_2(train_label, train_pred)
+            train_res = evaluate_3(train_label, train_pred)
             train_res_list.append(train_res)
 
-            fake_label = np.zeros(test_label.shape)
-            fake_res = evaluate_2(test_label, fake_label)
-            fake_res_list.append(fake_res)
+            # fake_label = np.zeros(test_label.shape)
+            # fake_res = evaluate_2(test_label, fake_label)
+            # fake_res_list.append(fake_res)
 
             index_list.append(data_file)
             print "data_file name: ", data_file
@@ -278,12 +293,11 @@ def test_multi_label_para(model_name, args):
                'auc_macro', 'auc_macro_std',
                'auc_weighted', 'auc_weighted_std'
                ]
-    df = pd.DataFrame(np.array(test_res_list), index = index_list, columns=column_list)
-    df.to_csv('./data/' + model_name + '_test_res.csv')
-    df = pd.DataFrame(np.array(train_res_list), index = index_list, columns=column_list)
-    df.to_csv('./data/' + model_name + '_train_res.csv')
-    df = pd.DataFrame(np.array(fake_res_list), index=index_list, columns=column_list)
-    df.to_csv('./data/' + model_name + '_fake_res.csv')
+    df = pd.DataFrame(np.array(test_res_list), index = index_list)
+    df.to_csv('./data/' + model_name + '_test_res_.csv')
+    df = pd.DataFrame(np.array(train_res_list), index = index_list)
+    df.to_csv('./data/' + model_name + '_train_res_.csv')
+
 
 
 if __name__ == '__main__':
