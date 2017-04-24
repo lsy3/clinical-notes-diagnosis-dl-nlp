@@ -202,17 +202,26 @@ def test_auto(args):
 	print weights_name
         model.load_weights(weights_name)
         print('Loaded model from disk')
+	
+	from keras.utils import plot_model
+	fig_name = './data/cache/' + model_name + '.png'
+	plot_model(model, fig_name, True, False)	
 
         test_pred = model.predict(test_sequence, batch_size=128, verbose=0)
         train_pred = model.predict(train_sequence, batch_size=128, verbose=0)
 
-        trainEval = evaluate_4(train_label, train_pred)
+        df = pd.DataFrame(test_pred)
+	df.to_csv(data_file[:-2] + '_' + model_name + '_test_pred.csv')
+	df = pd.DataFrame(test_label)
+	df.to_csv(data_file[:-2] + '_' + model_name + '_test_label.csv')
+
+	trainEval = evaluate_4(train_label, train_pred)
         testEval = evaluate_4(test_label, test_pred)
 
         df = pd.DataFrame(trainEval)
-        df.to_csv(data_file[:-2] + '_test_res.csv')
+        df.to_csv(data_file[:-2] + '_' + model_name + '_test_res.csv')
         df = pd.DataFrame(testEval)
-        df.to_csv(data_file[:-2] + '_train_res.csv')
+        df.to_csv(data_file[:-2] + '_' + model_name + '_train_res.csv')
 
 
 if __name__ == '__main__':
