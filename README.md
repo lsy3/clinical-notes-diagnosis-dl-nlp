@@ -5,11 +5,6 @@ Members:
 * Cesar Osorio
 * Luke Wicent Sy
 
-To be deleted soon
-1. Final Report (draft): [overleaf link](https://www.overleaf.com/8371794wnkynjkydwsn#/31606347/)
-1. Cesar's google drive with word2vec and doc2vec models
-    1. [here](https://drive.google.com/open?id=0B5wTZcZsz2x7eVhaNkJoNkNWaWs)
-
 ### Environment Setup (local)
 1. conda env create -f environment.yml
 1. Install spark or download spark binary from [here](https://spark.apache.org/downloads.html)
@@ -38,22 +33,6 @@ To be deleted soon
 1. If you have a jupyter notebook running in this VM, you can access via http://public_ip_addr:8888/
 1. To enable the GPUs for deep learning, follow the instructions in the tensorflow website [link](https://www.tensorflow.org/install/install_linux)
     * you can check the GPUs' status by "nvidia-smi"
-
-
-###Jupyter (on Docker VM)
-To be deleted soon
-1. Go to http://52.179.1.29:8888/
-1. If asked for a password, enter 'jupyter'.
-1. Logging in via SSH (see Docker w/ GPU).
-    * If you can't connect to jupyter, the VM might be down or it might need to be initialized via 'screen jupyter notebook'
-1. Uploading a file:
-    * scp -i path-to-git-root/id_rsa file-to-upload docker-user@52.179.1.29:~
-
-### Docker w/ GPU (for deep learning) [azure setup guide]()
-To be deleted soon
-1. make sure you have id_rsa (update your git repo using 'git pull')
-1. ssh -i path-to-git-root/id_rsa docker-user@52.179.1.29
-1. source activate cse6250
 
 ### Folder Structure
 * code: all source code
