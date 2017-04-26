@@ -1,11 +1,8 @@
 # CSE6250 Final Project: Learning to Diagnose using Clinical Notes
 
-Members:
-* Jinmiao Huang
-* Cesar Osorio
-* Luke Wicent Sy
+Members: Jinmiao Huang, Cesar Osorio, and Luke Wicent Sy
 
-Video: [link](https://youtu.be/vd1ZEibuQvk)
+Video: [link](https://youtu.be/xHFYFPpXLUg)
 
 ### Environment Setup (local)
 1. conda env create -f environment.yml
