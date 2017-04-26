@@ -5,6 +5,8 @@ Members:
 * Cesar Osorio
 * Luke Wicent Sy
 
+Video: [link](https://youtu.be/vd1ZEibuQvk)
+
 ### Environment Setup (local)
 1. conda env create -f environment.yml
 1. Install spark or download spark binary from [here](https://spark.apache.org/downloads.html)
