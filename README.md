@@ -42,6 +42,7 @@ Video: [link](https://youtu.be/xHFYFPpXLUg)
 1. (optional) cleaned NOTEEVENTS.csv using postgresql. imported NOTEEVENTS.csv by modifying [mimic iii github](https://github.com/MIT-LCP/mimic-code) and using the commands "select regexp_replace(field, E'[\\n\\r]+', ' ', 'g' )". the cleaned version (NOTEEVENTS-2.csv) can be downloaded in the google drive mentioned in "Environment Setup (local)"
 1. run preprocess.ipynb to produce DATA_HADM and DATA_HADM_CLEANED.
 1. run describe_icd9code.ipynb and describe_icd9category.ipynb to produce the descriptive statistics.
+1. (optional) run word2vec-generator.ipynb to produce the word2vec models
 1. run feature_extraction_seq.ipynb and feature_extraction_nonseq.ipynb to produce the input features for the machine learning and deep learning classifiers.
 1. run ml_baseline.py to get the results for Logistic Regression and Random Forest.
 1. run nn_baseline_train.py and nn_baseline_test.py to get the results for Feed-Forward Neural Network.
