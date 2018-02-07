@@ -1,7 +1,6 @@
 # An Empirical Evaluation of CNNs and RNNs for ICD-9 Code Assignment using MIMIC-III Clinical Notes
 
 * Members: Jinmiao Huang, Cesar Osorio, and Luke Wicent Sy (all three provided equal contribution)
-* Video: [link](https://youtu.be/xHFYFPpXLUg)
 * Report: [link](https://www.overleaf.com/read/wcwctcsstqvx)
 
 If you have questions on how to run this code, feel free to message us via github.
