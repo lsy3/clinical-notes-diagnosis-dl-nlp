@@ -1,7 +1,9 @@
 # An Empirical Evaluation of CNNs and RNNs for ICD-9 Code Assignment using MIMIC-III Clinical Notes
 
 * Members: Jinmiao Huang, Cesar Osorio, and Luke Wicent Sy (all three provided equal contribution)
-* Report: [link](https://www.overleaf.com/read/wcwctcsstqvx)
+* Report: [link](https://arxiv.org/abs/1802.02311)
+* If you used this code in your work, please cite the following citation:
+Huang, J., Osorio, C., & Sy, L. W. (2018). An Empirical Evaluation of Deep Learning for ICD-9 Code Assignment using MIMIC-III Clinical Notes. Retrieved from https://arxiv.org/pdf/1802.02311.pdf
 
 If you have questions on how to run this code, feel free to message us via github.
 
@@ -40,7 +42,7 @@ If you have questions on how to run this code, feel free to message us via githu
 1. jupyter toree install --user --spark_home=<complete path>/spark-2.1.0-bin-hadoop2.7 --interpreters=PySpark
 1. Extract the ff. files to the directory "code/data":
     * DIAGNOSES_ICD.csv (from MIMIC-III database)
-    * NOTEEVENTS-2.csv (cleaned version of MIMIC-III NOTEEVENTS.csv, replaced '\n' with ' ')
+    * NOTEEVENTS-2.csv (cleaned version of MIMIC-III NOTEEVENTS.csv, replaced '\n' with ' ') [link](https://drive.google.com/open?id=0B7IQxoKP3KPGU25pY1hNazZPYkE)
     * D_ICD_DIAGNOSES.csv (from MIMIC-III database)
     * model_word2vec_v2_*dim.txt (generated word2vec)
     * bio_nlp_vec/PubMed-shuffle-win-*.txt [Download here](https://github.com/cambridgeltl/BioNLP-2016) (you will need to convert the .bin files to .txt. I used gensim to do this)
