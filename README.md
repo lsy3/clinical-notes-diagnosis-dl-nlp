@@ -2,8 +2,8 @@
 
 * Members: Jinmiao Huang, Cesar Osorio, and Luke Wicent Sy (all three provided equal contribution)
 * Report: [link](https://arxiv.org/abs/1802.02311)
-* If you used this code in your work, please cite the following citation:
-Huang, J., Osorio, C., & Sy, L. W. (2018). An Empirical Evaluation of Deep Learning for ICD-9 Code Assignment using MIMIC-III Clinical Notes. Retrieved from https://arxiv.org/pdf/1802.02311.pdf
+* If you used this code in your work, please cite the following publication:
+      Huang, J., Osorio, C., & Sy, L. W. (2018). An Empirical Evaluation of Deep Learning for ICD-9 Code Assignment using MIMIC-III Clinical Notes. Retrieved from https://arxiv.org/pdf/1802.02311.pdf
 
 If you have questions on how to run this code, feel free to message us via github.
 
