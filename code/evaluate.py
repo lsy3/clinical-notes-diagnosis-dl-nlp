@@ -24,7 +24,7 @@ def evaluate_1(test_label, test_pred, gettopX=-1, getfirstX=-1, geteveryX=-1):
         f1_list[i] = f1
         accuracy = (tp + tn) / float(tp + tn + fp + fn)
         accuracy_list[i] = accuracy
-        print cm
+        print(cm)
     out = {'prec_mean': np.mean(precision_list),
            'prec_std': np.std(precision_list),
            'recall_mean': np.mean(recall_list),
@@ -186,7 +186,7 @@ def evaluate_4(y_true, y_pred):
     res_list = np.zeros((10, 6))
     for ii in range(1, 11):
         prob = ii / 10.0
-	pred_label = np.copy(y_pred)
+        pred_label = np.copy(y_pred)
         pred_label[pred_label >= prob] = 1
         pred_label[pred_label < prob] = 0
 

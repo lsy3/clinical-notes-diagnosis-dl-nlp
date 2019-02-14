@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-import cPickle
+import pickle
 import h5py
 
 def parse(s):
@@ -61,7 +61,7 @@ def csv2pickle(file_name):
 
     for i in range(len(features)):
         if i % 10000 == 0:
-            print i
+            print(i)
         _, val = parse(features[i][0])
         sparse_list.append(val)
 
@@ -86,7 +86,7 @@ def csv2pickle(file_name):
 
     f = open('./data/tfidf_top10.p', 'wb')
     for obj in [train_data, valid_data, test_data, train_label, valid_label, test_label, size]:
-        cPickle.dump(obj, f, protocol=cPickle.HIGHEST_PROTOCOL)
+        pickle.dump(obj, f, protocol=pickle.HIGHEST_PROTOCOL)
     f.close()
 
 
@@ -102,7 +102,7 @@ def csv2sparse(file_name, label_number):
 
     for i in range(len(features)):
         if i % 10000 == 0:
-            print i
+            print(i)
         _, val = parse(features[i][0])
         sparse_list.append(val)
 
@@ -114,7 +114,8 @@ if __name__ == '__main__':
     # valid_data, valid_label, size = csv2sparse('./data/DATA_TFIDFV0_HADM_TOP50CAT_val.csv')
     # test_data, test_label, size = csv2sparse('./data/DATA_TFIDFV0_HADM_TOP50CAT_test.csv')
 
-    feature_list = ['TFIDFV0', 'TFIDFV1', 'WORD2VECV0', 'WORD2VECV1', 'WORD2VECV2', 'WORD2VECV3', 'WORD2VECV4', 'DOC2VECV0', 'DOC2VECV1', 'DOC2VECV2']
+    # feature_list = ['TFIDFV0', 'TFIDFV1', 'WORD2VECV0', 'WORD2VECV1', 'WORD2VECV2', 'WORD2VECV3', 'WORD2VECV4', 'DOC2VECV0', 'DOC2VECV1', 'DOC2VECV2']
+    feature_list = ['TFIDFV0', 'TFIDFV1']
     # feature_list = ['TFIDFV1']
     type_list = ['10', '10CAT', '50', '50CAT']
     # type_list = ['10CAT']
@@ -123,7 +124,7 @@ if __name__ == '__main__':
             train_file_name = './data/DATA_' + feature + '_HADM_TOP' + tp + '_train.csv'
             valid_file_name = './data/DATA_' + feature + '_HADM_TOP' + tp + '_val.csv'
             test_file_name = './data/DATA_' + feature + '_HADM_TOP' + tp + '_test.csv'
-            print feature, tp
+            print (feature, tp)
 
             train_data, train_label, size = csv2sparse(train_file_name, int(tp[:2]))
             valid_data, valid_label, size = csv2sparse(valid_file_name, int(tp[:2]))
@@ -135,7 +136,7 @@ if __name__ == '__main__':
 
             f = open('./data/' + feature + '_' + tp + '.p', 'wb')
             for obj in [train_data, valid_data, test_data, train_label, valid_label, test_label, size]:
-                cPickle.dump(obj, f, protocol=cPickle.HIGHEST_PROTOCOL)
+                pickle.dump(obj, f, protocol=pickle.HIGHEST_PROTOCOL)
             f.close()
 
 

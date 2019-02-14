@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-import cPickle
+import pickle
 import argparse
 import os, sys
 from os.path import join
@@ -97,7 +97,7 @@ def train_multi_label(args):
     f = open(full_path, 'rb')
     loaded_data = []
     for i in range(7):  # [train_data, valid_data, test_data, train_label, valid_label, test_label, size]:
-        loaded_data.append(cPickle.load(f))
+        loaded_data.append(pickle.load(f))
     f.close()
 
     train_data = loaded_data[0]
@@ -139,7 +139,7 @@ def train_multi_label_auto():
             f = open(full_path, 'rb')
             loaded_data = []
             for i in range(7):  # [train_data, valid_data, test_data, train_label, valid_label, test_label, size]:
-                loaded_data.append(cPickle.load(f))
+                loaded_data.append(pickle.load(f))
             f.close()
 
             train_data = loaded_data[0]
@@ -163,17 +163,17 @@ def train_multi_label_para(model_name, args):
     #feature_file_list = ['TFIDFV0', 'TFIDFV1', 'WORD2VECV0', 'WORD2VECV1', 'WORD2VECV2', 'WORD2VECV3', 'WORD2VECV4', 'DOC2VECV0', 'DOC2VECV1', 'DOC2VECV2']
     feature_file_list = ['TFIDFV1']
     #data_file_list = ['10', '10CAT', '50', '50CAT']
-    data_file_list = ['10CAT']
+    data_file_list = ['10CAT', '50', '50CAT']
     for i in feature_file_list:
         for j in data_file_list:
             data_file = i + '_' + j
-            print data_file
+            print(data_file)
             full_path = './data/' + data_file + '.p'
 
             f = open(full_path, 'rb')
             loaded_data = []
             for ii in range(7):  # [train_data, valid_data, test_data, train_label, valid_label, test_label, size]:
-                loaded_data.append(cPickle.load(f))
+                loaded_data.append(pickle.load(f))
             f.close()
 
             train_data = loaded_data[0]
@@ -186,12 +186,12 @@ def train_multi_label_para(model_name, args):
                 n = int(args.labelmode[4:].strip())
                 train_label = np.tile(train_label, n)
                 valid_label = np.tile(valid_label, n)
-                print 'labelmode: tile {0}'.format(train_label.shape)
+                print('labelmode: tile {0}'.format(train_label.shape))
             elif args.labelmode[:6] == 'repeat':
                 n = int(args.labelmode[6:].strip())
                 train_label = np.repeat(train_label, n, axis=1)
                 valid_label = np.repeat(valid_label, n, axis=1)
-                print 'labelmode: repeat {0}'.format(train_label.shape)
+                print('labelmode: repeat {0}'.format(train_label.shape))
 
             train_data = sparse2dense(train_data, feature_size)
             valid_data = sparse2dense(valid_data, feature_size)
@@ -227,7 +227,7 @@ def train_multi_model():
     train_data_std = np.max(train_data, axis = 0)
     f = open('./data/' + data_file + '_z.p', 'wb')
     for obj in [train_data_mean, train_data_std]:
-        cPickle.dump(obj, f, protocol=cPickle.HIGHEST_PROTOCOL)
+        pickle.dump(obj, f, protocol=pickle.HIGHEST_PROTOCOL)
     f.close()
     # train_data -= train_data_mean
     # valid_data -= train_data_mean
@@ -254,9 +254,7 @@ if __name__ == '__main__':
     # args = parser.parse_args()
     args = parse_args()
     n = args.gpu
-    model_name = 'nn_model_' + str(args.gpu)
-    if args.gpu == 2:
-        args.gpu = 0
+    model_name = args.model_name
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
     train_multi_label_para(model_name, args)
 

@@ -1,4 +1,4 @@
-import cPickle
+import pickle
 import argparse
 import sys
 from os.path import join
@@ -56,7 +56,7 @@ def test_multi_label(args):
     f = open(full_path, 'rb')
     loaded_data = []
     for i in range(7):  # [train_data, valid_data, test_data, train_label, valid_label, test_label, size]:
-        loaded_data.append(cPickle.load(f))
+        loaded_data.append(pickle.load(f))
     f.close()
 
     # test_data = loaded_data[0]
@@ -86,27 +86,27 @@ def test_multi_label(args):
     trainEval = evaluate_1(test_label, test_pred, gettopX=10)
     testEval = evaluate_1(test_label, test_pred, gettopX=10)
 
-    print "train: "
+    print("train: ")
 
     for i in ['prec', 'recall', 'acc', 'f1']:
-        print "{0}: {1} std: {2}".format(i,
+        print("{0}: {1} std: {2}".format(i,
                                          trainEval["{0}_mean{1}".format(i, code)],
-                                         trainEval["{0}_std{1}".format(i, code)])
+                                         trainEval["{0}_std{1}".format(i, code)]))
         if "{0}_mean{1}2".format(i, code) not in trainEval: continue
-        print "{0}_zeronan: {1} std: {2}".format(i,
+        print("{0}_zeronan: {1} std: {2}".format(i,
                                                  trainEval["{0}_mean{1}2".format(i, code)],
-                                                 trainEval["{0}_std{1}2".format(i, code)])
+                                                 trainEval["{0}_std{1}2".format(i, code)]))
 
-    print "test:"
+    print("test:")
     for i in ['prec', 'recall', 'acc', 'f1']:
-        print "{0}: {1} std: {2}".format(i,
+        print("{0}: {1} std: {2}".format(i,
                                          testEval["{0}_mean{1}".format(i, code)],
-                                         testEval["{0}_std{1}".format(i, code)])
+                                         testEval["{0}_std{1}".format(i, code)]))
         if "{0}_mean{1}2".format(i, code) not in testEval: continue
-        print "{0}_zeronan: {1} std: {2}".format(i,
+        print("{0}_zeronan: {1} std: {2}".format(i,
                                                  testEval["{0}_mean{1}2".format(i, code)],
-                                                 testEval["{0}_std{1}2".format(i, code)])
-    print ""
+                                                 testEval["{0}_std{1}2".format(i, code)]))
+    print("")
 
     precision_list = np.zeros((test_label.shape[1]))
     recall_list = np.zeros((test_label.shape[1]))
@@ -115,7 +115,7 @@ def test_multi_label(args):
 
     for i in range(test_label.shape[1]):
         cm = confusion_matrix(test_label[:, i],test_pred[:, i])
-        print cm
+        print(cm)
         tn = cm[0, 0]
         fp = cm[0, 1]
         fn = cm[1, 0]
@@ -132,14 +132,14 @@ def test_multi_label(args):
         accuracy = (tp + tn) / float(tp + tn + fp + fn)
         accuracy_list[i] = accuracy
 
-    print "precision: ", np.mean(precision_list), "std: ", np.std(precision_list)
-    print "recall: ", np.mean(recall_list), "std: ", np.std(recall_list)
-    print "accuracy: ", np.mean(accuracy_list), "std: ", np.std(accuracy_list)
-    print "f1: ", np.mean(f1_list), "std: ", np.std(f1_list)
-    print "precision_list: ", precision_list
-    print "recall_list: ", recall_list
-    print "accuracy_list: ", accuracy_list
-    print "f1_list: ", f1_list
+    print("precision: ", np.mean(precision_list), "std: ", np.std(precision_list))
+    print("recall: ", np.mean(recall_list), "std: ", np.std(recall_list))
+    print("accuracy: ", np.mean(accuracy_list), "std: ", np.std(accuracy_list))
+    print("f1: ", np.mean(f1_list), "std: ", np.std(f1_list))
+    print("precision_list: ", precision_list)
+    print("recall_list: ", recall_list)
+    print("accuracy_list: ", accuracy_list)
+    print("f1_list: ", f1_list)
 
 
 def test_multi_model():
@@ -151,7 +151,7 @@ def test_multi_model():
     f = open(full_path, 'rb')
     loaded_data = []
     for i in range(7):  # [train_data, valid_data, test_data, train_label, valid_label, test_label, size]:
-        loaded_data.append(cPickle.load(f))
+        loaded_data.append(pickle.load(f))
     f.close()
 
     test_data = loaded_data[2]
@@ -182,7 +182,7 @@ def test_multi_model():
         # test_pred[test_pred >= 0.5] = 1
         # test_pred[test_pred < 0.5] = 0
         cm = confusion_matrix(test_single, test_pred)
-        print cm
+        print(cm)
         tn = cm[0, 0]
         fp = cm[0, 1]
         fn = cm[1, 0]
@@ -199,18 +199,18 @@ def test_multi_model():
         accuracy = (tp + tn) / float(tp + tn + fp + fn)
         accuracy_list[i] = accuracy
 
-    print "precision: ", np.mean(precision_list), "std: ", np.std(precision_list)
-    print "recall: ", np.mean(recall_list), "std: ", np.std(recall_list)
-    print "accuracy: ", np.mean(accuracy_list), "std: ", np.std(accuracy_list)
-    print "f1: ", np.mean(f1_list), "std: ", np.std(f1_list)
+    print("precision: ", np.mean(precision_list), "std: ", np.std(precision_list))
+    print("recall: ", np.mean(recall_list), "std: ", np.std(recall_list))
+    print("accuracy: ", np.mean(accuracy_list), "std: ", np.std(accuracy_list))
+    print("f1: ", np.mean(f1_list), "std: ", np.std(f1_list))
 
 
 def test_multi_label_para(model_name, args):
-    feature_file_list = ['TFIDFV0', 'TFIDFV1', 'WORD2VECV0', 'WORD2VECV1', 'WORD2VECV2', 'WORD2VECV3', 'WORD2VECV4']
+    # feature_file_list = ['TFIDFV0', 'TFIDFV1', 'WORD2VECV0', 'WORD2VECV1', 'WORD2VECV2', 'WORD2VECV3', 'WORD2VECV4']
     # feature_file_list = ['DOC2VECV0', 'DOC2VECV1', 'DOC2VECV2']
-    # feature_file_list = ['TFIDFV1']
-    data_file_list = ['50', '50CAT']
-    # data_file_list = ['10', '10CAT']
+    feature_file_list = ['TFIDFV1']
+    # data_file_list = ['50', '50CAT']
+    data_file_list = ['10CAT', '50', '50CAT']
     test_res_list = []
     train_res_list = []
     fake_res_list = []
@@ -223,7 +223,7 @@ def test_multi_label_para(model_name, args):
             f = open(full_path, 'rb')
             loaded_data = []
             for ii in range(7):  # [train_data, valid_data, test_data, train_label, valid_label, test_label, size]:
-                loaded_data.append(cPickle.load(f))
+                loaded_data.append(pickle.load(f))
             f.close()
 
             train_data = loaded_data[0]
@@ -235,17 +235,17 @@ def test_multi_label_para(model_name, args):
             feature_size = loaded_data[6]
 
             if args.labelmode[:4] == 'tile':
-                n = int(args.labelmode[4:].strip()
+                n = int(args.labelmode[4:].strip())
                 train_label = np.tile(train_label, n)
                 valid_label = np.tile(valid_label, n)
                 test_label = np.tile(test_label, n)
-                print 'labelmode: tile {0}'.format(train_label.shape)
+                print('labelmode: tile {0}'.format(train_label.shape))
             elif args.labelmode[:6] == 'repeat':
-                n = int(args.labelmode[6:].strip()
+                n = int(args.labelmode[6:].strip())
                 train_label = np.repeat(train_label, n, axis=1)
                 valid_label = np.repeat(valid_label, n, axis=1)
                 test_label = np.repeat(test_label, n, axis=1)
-                print 'labelmode: repeat {0}'.format(train_label.shape)
+                print('labelmode: repeat {0}'.format(train_label.shape))
 
             file_path = './data/cache'
             weights_name = 'weight_' + model_name + '_' + data_file + '.h5'
@@ -282,7 +282,7 @@ def test_multi_label_para(model_name, args):
             # fake_res_list.append(fake_res)
 
             index_list.append(data_file)
-            print "data_file name: ", data_file
+            print("data_file name: ", data_file)
 
     df = pd.DataFrame(np.array(test_res_list), index = index_list)
     df.to_csv('./data/' + model_name + '_test_res_.csv')
@@ -295,6 +295,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--gpu', dest='gpu', help='gpu_number', default=2, type=int)
     parser.add_argument('--model', dest='model', help='model_number', default=1, type=int)
+    parser.add_argument('--labelmode', dest ='labelmode', 
+                        help='additional label processing. Option: tile<num>, repeat<num>',
+                        default='', type=str)
     args = parser.parse_args()
     model_name = 'nn_model_' + str(args.model)
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)

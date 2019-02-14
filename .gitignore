@@ -1,0 +1,5 @@
+code/data/*.p
+code/data/*.csv
+code/data/cache
+code/data/bio_nlp_vec
+code/data/*.txt
