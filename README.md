@@ -1,11 +1,9 @@
 # An Empirical Evaluation of CNNs and RNNs for ICD-9 Code Assignment using MIMIC-III Clinical Notes
 
 * Members: Jinmiao Huang, Cesar Osorio, and Luke Wicent Sy (all three provided equal contribution)
-* Report: [link](https://arxiv.org/abs/1802.02311)
+* Report: [arxiv](https://arxiv.org/abs/1802.02311) [published version](https://doi.org/10.1016/j.cmpb.2019.05.024)
 * If you used this code in your work, please cite the following publication:
-      Huang, J., Osorio, C., & Sy, L. W. (2018). An Empirical Evaluation of Deep Learning for ICD-9 Code Assignment using MIMIC-III Clinical Notes. Retrieved from https://arxiv.org/pdf/1802.02311.pdf
-
-If you have questions on how to run this code, feel free to message us via github.
+      Huang, J., Osorio, C., & Sy, L. W. (2019). An empirical evaluation of deep learning for ICD-9 code assignment using MIMIC-III clinical notes. Computer Methods and Programs in Biomedicine, 177, 141–153. https://doi.org/10.1016/J.CMPB.2019.05.024
 
 ### General Pipeline
 1. (optional) cleaned NOTEEVENTS.csv using postgresql. imported NOTEEVENTS.csv by modifying [mimic iii github](https://github.com/MIT-LCP/mimic-code) and using the commands "select regexp_replace(field, E'[\\n\\r]+', ' ', 'g' )". the cleaned version (NOTEEVENTS-2.csv) can be downloaded in the google drive mentioned in "Environment Setup (local)"
