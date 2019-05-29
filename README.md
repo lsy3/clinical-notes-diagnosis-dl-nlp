@@ -1,7 +1,7 @@
 # An Empirical Evaluation of CNNs and RNNs for ICD-9 Code Assignment using MIMIC-III Clinical Notes
 
 * Members: Jinmiao Huang, Cesar Osorio, and Luke Wicent Sy (all three provided equal contribution)
-* Report: [arxiv](https://arxiv.org/abs/1802.02311) [published version](https://doi.org/10.1016/j.cmpb.2019.05.024)
+* Publication: [arxiv (2018)](https://arxiv.org/abs/1802.02311), [elsevier (updated 2019)](https://doi.org/10.1016/j.cmpb.2019.05.024)
 * If you used this code in your work, please cite the following publication:
       Huang, J., Osorio, C., & Sy, L. W. (2019). An empirical evaluation of deep learning for ICD-9 code assignment using MIMIC-III clinical notes. Computer Methods and Programs in Biomedicine, 177, 141–153. https://doi.org/10.1016/J.CMPB.2019.05.024
 
