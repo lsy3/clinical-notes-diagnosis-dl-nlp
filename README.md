@@ -40,7 +40,7 @@
 1. jupyter toree install --user --spark_home=<complete path>/spark-2.1.0-bin-hadoop2.7 --interpreters=PySpark
 1. Extract the ff. files to the directory "code/data":
     * DIAGNOSES_ICD.csv (from MIMIC-III database)
-    * NOTEEVENTS-2.csv (cleaned version of MIMIC-III NOTEEVENTS.csv, replaced '\n' with ' ') [link](https://drive.google.com/open?id=0B7IQxoKP3KPGU25pY1hNazZPYkE)
+    * NOTEEVENTS-2.csv (cleaned version of MIMIC-III NOTEEVENTS.csv, replaced '\n' with ' ') [link](https://drive.google.com/file/d/0B7IQxoKP3KPGU25pY1hNazZPYkE/view?usp=sharing&resourcekey=0-rCepn0-MTOP2_cj-A2laew)
     * D_ICD_DIAGNOSES.csv (from MIMIC-III database)
     * model_word2vec_v2_*dim.txt (generated word2vec)
     * bio_nlp_vec/PubMed-shuffle-win-*.txt [Download here](https://github.com/cambridgeltl/BioNLP-2016) (you will need to convert the .bin files to .txt. I used gensim to do this)
